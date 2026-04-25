@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
+import { Providers } from "@/components/Providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -21,9 +23,11 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans bg-[#0a0a0a] text-white antialiased selection:bg-brand-orange/30 selection:text-brand-orange`}
       >
-        <main className="min-h-screen w-full relative">
-          {children}
-        </main>
+        <Providers>
+          <main className="min-h-screen w-full relative">
+            {children}
+          </main>
+        </Providers>
       </body>
     </html>
   );
