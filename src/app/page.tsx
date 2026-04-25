@@ -16,7 +16,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="z-10 w-full flex flex-col items-center mt-12"
+        className="z-10 w-full max-w-lg flex flex-col items-center mt-12"
       >
         <div className="bg-[#111] p-4 rounded-full mb-6 border border-white/5 shadow-lg shadow-brand-orange/10">
           <Dumbbell size={32} className="text-brand-orange" />

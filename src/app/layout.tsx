@@ -21,7 +21,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans bg-[#0a0a0a] text-white antialiased selection:bg-brand-orange/30 selection:text-brand-orange`}
       >
-        <main className="min-h-screen flex flex-col max-w-md mx-auto w-full relative">
+        <main className="min-h-screen w-full relative">
           {children}
         </main>
       </body>
