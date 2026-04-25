@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -21,8 +20,8 @@ model Workout {
   id        String    @id @default(cuid())
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String?   // Ej: "Día de Pierna"
-  notes     String?   // Notas in-workout
+  name      String? // Ej: "Día de Pierna"
+  notes     String? // Notas in-workout
   sets      Set[]
   startTime DateTime  @default(now())
   endTime   DateTime? // Si es nulo, el entrenamiento sigue en curso
@@ -32,8 +31,8 @@ model Set {
   id        String   @id @default(cuid())
   workoutId String
   workout   Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
-  exercise  String   // Ej: "Press Banca"
-  weight    Float    // En kg
+  exercise  String // Ej: "Press Banca"
+  weight    Float // En kg
   reps      Int
   completed Boolean  @default(false) // Checkbox interactivo in-workout
   createdAt DateTime @default(now())
