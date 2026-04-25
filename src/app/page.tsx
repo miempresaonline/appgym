@@ -74,14 +74,13 @@ export default function Home() {
             >
               Iniciar Sesión
             </button>
-        </motion.div>
-      </motion.div>
+          </form>
 
-      <style jsx global>{`
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
+          <p className="text-center text-gray-500 text-xs mt-6">
+            ¿No tienes cuenta? <span className="text-brand-orange cursor-pointer hover:underline">Regístrate en segundos</span>
+          </p>
+        </div>
+      </motion.div>
     </div>
   );
 }
