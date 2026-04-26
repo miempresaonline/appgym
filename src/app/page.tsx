@@ -88,32 +88,32 @@ export default function Home() {
                 whileHover={{ scale: 1.03, y: -4, boxShadow: "0 20px 40px -10px rgba(255,255,255,0.3)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => signIn('google')}
-                className="w-full relative flex items-center justify-center gap-4 bg-white/90 backdrop-blur-md text-black font-bold py-4 px-6 rounded-2xl shadow-[0_10px_20px_-10px_rgba(0,0,0,0.2)] transition-all duration-300"
+                className="w-full flex items-center justify-center gap-3 bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-4 px-6 rounded-[1.25rem] shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(255,255,255,0.1)] transition-all duration-300 relative overflow-hidden group"
               >
-                <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden="true">
-                  <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335" />
-                  <path d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z" fill="#4285F4" />
-                  <path d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z" fill="#FBBC05" />
-                  <path d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.26538 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z" fill="#34A853" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:animate-[shine_2s_ease-in-out_infinite]" />
+                <svg className="w-6 h-6 relative z-10" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
-                Continuar con Google
+                <span className="relative z-10 tracking-wide text-lg">Continuar con Google</span>
               </motion.button>
 
-              <div className="relative flex items-center py-4">
-                <div className="flex-grow border-t border-white/10"></div>
-                <span className="flex-shrink-0 mx-4 text-xs text-white/40 uppercase tracking-[0.2em] font-medium">O usa tu email</span>
-                <div className="flex-grow border-t border-white/10"></div>
+              <div className="flex items-center gap-4 w-full">
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-white/20" />
+                <span className="text-white/40 text-xs font-semibold tracking-widest uppercase">O usa tu email</span>
+                <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-white/20" />
               </div>
 
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-                <div className="space-y-4">
-                  {/* Neumorphic/Glass Inputs */}
+              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <div className="space-y-2">
                   <input 
                     type="email" 
                     placeholder="tucorreo@ejemplo.com" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/30 text-lg focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-black/30 transition-all shadow-inner"
+                    className="w-full bg-black/20 border border-white/10 rounded-[1.25rem] px-5 py-4 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-black/30 transition-all shadow-inner backdrop-blur-md"
                   />
                   <input 
                     type="password" 
