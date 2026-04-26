@@ -69,15 +69,8 @@ export default function Home() {
           initial={{ opacity: 0, y: 40, scale: 0.95, filter: "blur(10px)" }}
           animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-          className="w-full lg:max-w-[480px] flex-shrink-0 perspective-[1000px]"
-        >
-          {/* The Glass Container */}
-        <motion.div 
-          initial={{ opacity: 0, x: 40, filter: "blur(10px)", scale: 0.95 }}
-          animate={{ opacity: 1, x: 0, filter: "blur(0px)", scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           whileHover={{ rotateX: 2, rotateY: -2 }}
-          className="w-full lg:w-[480px] bg-white/[0.08] backdrop-blur-2xl border border-white/20 p-10 md:p-14 rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] relative overflow-hidden perspective-[1000px]"
+          className="w-full lg:w-[480px] flex-shrink-0 bg-white/[0.08] backdrop-blur-2xl border border-white/20 p-10 md:p-14 rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] relative overflow-hidden perspective-[1000px]"
         >
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
           <div className="absolute top-0 left-[-100%] w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[45deg] animate-[shine_8s_ease-in-out_infinite]" />
