@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ArrowRight } from "lucide-react";
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);
@@ -16,28 +16,35 @@ export default function Onboarding() {
   };
 
   const finishOnboarding = () => {
-    // TODO: Save to database using a server action or API route
     console.log("Onboarding finished:", { name, age, goal });
     window.location.href = "/dashboard";
   };
 
   const containerVariants = {
-    hidden: { opacity: 0, x: 50 },
-    visible: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -50 }
+    hidden: { opacity: 0, x: 40, filter: "blur(10px)" },
+    visible: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } },
+    exit: { opacity: 0, x: -40, filter: "blur(10px)", transition: { duration: 0.3 } }
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6 text-white relative overflow-hidden">
-      {/* Dynamic Background */}
-      <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-brand-orange/10 via-purple-900/5 to-transparent opacity-60 blur-[100px] pointer-events-none" />
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 overflow-hidden relative bg-[#050505] selection:bg-purple-500/30">
+      
+      {/* Premium Ambient Background */}
+      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-900/20 blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-orange-900/10 blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiLz48L3N2Zz4=')] opacity-50 pointer-events-none" />
 
-      <div className="w-full max-w-sm z-10">
+      <div className="w-full max-w-[420px] z-10 relative">
         <AnimatePresence mode="wait">
           {step === 1 && (
-            <motion.div key="step1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
-              <h1 className="text-3xl font-extrabold tracking-tight">Hola, soy tu Entrenador Invisible.</h1>
-              <p className="text-gray-400 text-lg">Para ajustar mis algoritmos a tu cuerpo, ¿cómo te llamo?</p>
+            <motion.div key="step1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+              
+              <div className="space-y-3">
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">Hola, soy tu Entrenador.</h1>
+                <p className="text-white/50 text-base md:text-lg">Para ajustar mis algoritmos a tu cuerpo, ¿cómo te llamo?</p>
+              </div>
+
               <input 
                 type="text" 
                 autoFocus
@@ -45,22 +52,30 @@ export default function Onboarding() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && name && nextStep()}
-                className="w-full bg-[#111] border border-white/10 rounded-2xl px-5 py-4 text-xl font-medium text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 transition-all"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-2xl px-5 py-4 text-xl font-medium text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-white/[0.06] transition-all"
               />
-              <button 
+              
+              <motion.button 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={nextStep}
                 disabled={!name}
-                className="w-full flex items-center justify-center gap-2 bg-brand-orange text-white font-bold py-4 px-4 rounded-2xl hover:bg-orange-500 hover:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 disabled:hover:bg-brand-orange"
+                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white font-semibold py-4 px-4 rounded-2xl shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100 group"
               >
-                Continuar <ChevronRight size={20} />
-              </button>
+                Continuar <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </motion.button>
             </motion.div>
           )}
 
           {step === 2 && (
-            <motion.div key="step2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
-              <h1 className="text-3xl font-extrabold tracking-tight">Encantado, {name}.</h1>
-              <p className="text-gray-400 text-lg">¿Cuántos años tienes? Lo necesito para medir tu recuperación.</p>
+            <motion.div key="step2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+
+              <div className="space-y-3">
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">Encantado, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400">{name}</span>.</h1>
+                <p className="text-white/50 text-base md:text-lg">¿Cuántos años tienes? Lo necesito para medir tu recuperación.</p>
+              </div>
+
               <input 
                 type="number" 
                 autoFocus
@@ -68,43 +83,52 @@ export default function Onboarding() {
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && age && nextStep()}
-                className="w-full bg-[#111] border border-white/10 rounded-2xl px-5 py-4 text-xl font-medium text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-orange/50 transition-all"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-2xl px-5 py-4 text-xl font-medium text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-white/[0.06] transition-all"
               />
-              <button 
+              
+              <motion.button 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={nextStep}
                 disabled={!age}
-                className="w-full flex items-center justify-center gap-2 bg-brand-orange text-white font-bold py-4 px-4 rounded-2xl hover:bg-orange-500 hover:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100"
+                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white font-semibold py-4 px-4 rounded-2xl shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100 group"
               >
-                Continuar <ChevronRight size={20} />
-              </button>
+                Continuar <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </motion.button>
             </motion.div>
           )}
 
           {step === 3 && (
-            <motion.div key="step3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-6">
-              <h1 className="text-3xl font-extrabold tracking-tight">Última pregunta.</h1>
-              <p className="text-gray-400 text-lg">¿A qué has venido al gimnasio? ¿Cuál es tu meta real?</p>
+            <motion.div key="step3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+
+              <div className="space-y-3">
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">Última pregunta.</h1>
+                <p className="text-white/50 text-base md:text-lg">¿A qué has venido al gimnasio? ¿Cuál es tu meta real?</p>
+              </div>
               
               <div className="space-y-3">
                 {['Ganar fuerza bruta', 'Ganar masa muscular', 'Perder grasa y definir', 'Mantenerme sano'].map((g) => (
-                  <button
+                  <motion.button
                     key={g}
+                    whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.06)" }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => { setGoal(g); finishOnboarding(); }}
-                    className="w-full text-left bg-[#111] border border-white/10 hover:border-brand-orange/50 rounded-2xl px-5 py-4 text-lg font-medium text-gray-200 hover:text-white transition-all flex items-center justify-between group"
+                    className="w-full text-left bg-white/[0.03] border border-white/[0.08] hover:border-purple-500/50 rounded-2xl px-5 py-4 text-lg font-medium text-white/80 hover:text-white transition-all flex items-center justify-between group shadow-sm"
                   >
                     {g}
-                    <ChevronRight size={20} className="opacity-0 group-hover:opacity-100 text-brand-orange transition-opacity" />
-                  </button>
+                    <ChevronRight size={20} className="text-white/20 group-hover:text-orange-400 transition-colors" />
+                  </motion.button>
                 ))}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Progress Bar */}
-        <div className="mt-12 flex justify-center gap-2">
+        {/* Minimal Progress Bar */}
+        <div className="absolute -bottom-16 inset-x-0 flex justify-center gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className={`h-1 rounded-full transition-all duration-300 ${step >= i ? 'w-8 bg-brand-orange' : 'w-2 bg-white/10'}`} />
+            <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ease-out ${step >= i ? 'w-10 bg-gradient-to-r from-purple-500 to-orange-400 shadow-[0_0_10px_rgba(139,92,246,0.5)]' : 'w-3 bg-white/10'}`} />
           ))}
         </div>
       </div>
