@@ -20,7 +20,7 @@ export default function Onboarding() {
     window.location.href = "/dashboard";
   };
 
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0, x: 40, filter: "blur(10px)" },
     visible: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } },
     exit: { opacity: 0, x: -40, filter: "blur(10px)", transition: { duration: 0.3 } }
