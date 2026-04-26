@@ -21,111 +21,157 @@ export default function Onboarding() {
   };
 
   const containerVariants: any = {
-    hidden: { opacity: 0, x: 40, filter: "blur(10px)" },
-    visible: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.5, ease: "easeOut" } },
-    exit: { opacity: 0, x: -40, filter: "blur(10px)", transition: { duration: 0.3 } }
+    hidden: { opacity: 0, x: 40, filter: "blur(10px)", scale: 0.95 },
+    visible: { opacity: 1, x: 0, filter: "blur(0px)", scale: 1, transition: { duration: 0.6, ease: "easeOut" } },
+    exit: { opacity: 0, x: -40, filter: "blur(10px)", scale: 0.95, transition: { duration: 0.4 } }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 overflow-hidden relative bg-[#050505] selection:bg-purple-500/30">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 overflow-hidden relative bg-[#030014] selection:bg-purple-500/30 text-white font-sans">
       
-      {/* Premium Ambient Background */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-900/20 blur-[120px] pointer-events-none mix-blend-screen" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-orange-900/10 blur-[120px] pointer-events-none mix-blend-screen" />
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiLz48L3N2Zz4=')] opacity-50 pointer-events-none" />
+      {/* Liquid Glass Dynamic Background (Animated Orbs) */}
+      <motion.div 
+        animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] md:w-[50vw] md:h-[50vw] rounded-full bg-purple-700/40 blur-[100px] md:blur-[180px] mix-blend-screen pointer-events-none" 
+      />
+      <motion.div 
+        animate={{ scale: [1, 1.5, 1], rotate: [0, -90, 0] }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+        className="absolute bottom-[-20%] right-[-10%] w-[80vw] h-[80vw] md:w-[60vw] md:h-[60vw] rounded-full bg-orange-600/30 blur-[100px] md:blur-[180px] mix-blend-screen pointer-events-none" 
+      />
+      <motion.div 
+        animate={{ y: [0, -50, 0], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-[20%] right-[20%] w-[40vw] h-[40vw] rounded-full bg-pink-600/20 blur-[120px] mix-blend-screen pointer-events-none" 
+      />
+      
+      {/* Subtle Noise Texture */}
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
 
-      <div className="w-full max-w-[420px] z-10 relative">
+      <div className="w-full max-w-[500px] z-10 relative perspective-[1000px]">
         <AnimatePresence mode="wait">
           {step === 1 && (
-            <motion.div key="step1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-10 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-10 md:p-14 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+            <motion.div 
+              key="step1" 
+              variants={containerVariants} 
+              initial="hidden" 
+              animate="visible" 
+              exit="exit" 
+              whileHover={{ rotateX: 2, rotateY: -2 }}
+              className="space-y-10 bg-white/[0.08] backdrop-blur-2xl border border-white/20 p-10 md:p-14 rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+              <div className="absolute top-0 left-[-100%] w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[45deg] animate-[shine_8s_ease-in-out_infinite]" />
               
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 leading-tight">Hola, soy tu <br/> Entrenador.</h1>
-                <p className="text-white/50 text-lg md:text-xl font-medium">Para ajustar mis algoritmos a tu cuerpo, ¿cómo te llamo?</p>
+              <div className="space-y-4 relative z-10">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 leading-[1.1] drop-shadow-lg">Hola, soy tu <br/> Entrenador.</h1>
+                <p className="text-white/60 text-lg md:text-xl font-medium">Para ajustar mis algoritmos a tu cuerpo, ¿cómo te llamo?</p>
               </div>
 
-              <input 
-                type="text" 
-                autoFocus
-                placeholder="Tu nombre o apodo" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && name && nextStep()}
-                className="w-full bg-[#111111]/80 border border-white/[0.08] rounded-2xl px-6 py-5 text-2xl font-semibold text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-[#1a1a1a] transition-all"
-              />
+              <div className="relative z-10">
+                <input 
+                  type="text" 
+                  autoFocus
+                  placeholder="Tu nombre o apodo" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && name && nextStep()}
+                  className="w-full bg-black/20 border border-white/10 rounded-2xl px-6 py-5 text-2xl font-semibold text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-black/30 transition-all shadow-inner"
+                />
+              </div>
               
               <motion.button 
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.03, y: -4, boxShadow: "0 20px 40px -10px rgba(139,92,246,0.6)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={nextStep}
                 disabled={!name}
-                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-purple-700 via-purple-600 to-orange-500 text-white font-bold py-5 px-6 rounded-2xl shadow-[0_10px_30px_-10px_rgba(139,92,246,0.5)] hover:shadow-[0_15px_40px_-10px_rgba(139,92,246,0.7)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100 group"
-                style={{ backgroundSize: '200% auto', animation: 'gradient 4s linear infinite' }}
+                className="w-full relative overflow-hidden flex items-center justify-center gap-3 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold py-5 px-6 rounded-2xl shadow-[0_10px_20px_-10px_rgba(139,92,246,0.4)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100 disabled:hover:translate-y-0 z-10"
               >
-                <span className="relative z-10 flex items-center justify-center gap-2 text-lg tracking-wide">
+                <div className="absolute inset-0 bg-white/20 opacity-0 hover:opacity-100 transition-opacity" />
+                <span className="relative z-10 flex items-center justify-center gap-2 text-lg tracking-wide drop-shadow-md">
                   CONTINUAR
-                  <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight size={22} />
                 </span>
               </motion.button>
             </motion.div>
           )}
 
           {step === 2 && (
-            <motion.div key="step2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-10 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-10 md:p-14 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+            <motion.div 
+              key="step2" 
+              variants={containerVariants} 
+              initial="hidden" 
+              animate="visible" 
+              exit="exit" 
+              whileHover={{ rotateX: 2, rotateY: -2 }}
+              className="space-y-10 bg-white/[0.08] backdrop-blur-2xl border border-white/20 p-10 md:p-14 rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+              <div className="absolute top-0 left-[-100%] w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[45deg] animate-[shine_8s_ease-in-out_infinite]" />
 
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 leading-tight">Encantado, <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400">{name}</span>.</h1>
-                <p className="text-white/50 text-lg md:text-xl font-medium">¿Cuántos años tienes? Lo necesito para medir tu recuperación.</p>
+              <div className="space-y-4 relative z-10">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 leading-[1.1] drop-shadow-lg">Encantado, <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400">{name}</span>.</h1>
+                <p className="text-white/60 text-lg md:text-xl font-medium">¿Cuántos años tienes? Lo necesito para medir tu recuperación.</p>
               </div>
 
-              <input 
-                type="number" 
-                autoFocus
-                placeholder="Tu edad" 
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && age && nextStep()}
-                className="w-full bg-[#111111]/80 border border-white/[0.08] rounded-2xl px-6 py-5 text-2xl font-semibold text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-[#1a1a1a] transition-all"
-              />
+              <div className="relative z-10">
+                <input 
+                  type="number" 
+                  autoFocus
+                  placeholder="Tu edad" 
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && age && nextStep()}
+                  className="w-full bg-black/20 border border-white/10 rounded-2xl px-6 py-5 text-2xl font-semibold text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-black/30 transition-all shadow-inner"
+                />
+              </div>
               
               <motion.button 
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.03, y: -4, boxShadow: "0 20px 40px -10px rgba(139,92,246,0.6)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={nextStep}
                 disabled={!age}
-                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-purple-700 via-purple-600 to-orange-500 text-white font-bold py-5 px-6 rounded-2xl shadow-[0_10px_30px_-10px_rgba(139,92,246,0.5)] hover:shadow-[0_15px_40px_-10px_rgba(139,92,246,0.7)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100 group"
-                style={{ backgroundSize: '200% auto', animation: 'gradient 4s linear infinite' }}
+                className="w-full relative overflow-hidden flex items-center justify-center gap-3 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold py-5 px-6 rounded-2xl shadow-[0_10px_20px_-10px_rgba(139,92,246,0.4)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100 disabled:hover:translate-y-0 z-10"
               >
-                <span className="relative z-10 flex items-center justify-center gap-2 text-lg tracking-wide">
+                <div className="absolute inset-0 bg-white/20 opacity-0 hover:opacity-100 transition-opacity" />
+                <span className="relative z-10 flex items-center justify-center gap-2 text-lg tracking-wide drop-shadow-md">
                   CONTINUAR
-                  <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight size={22} />
                 </span>
               </motion.button>
             </motion.div>
           )}
 
           {step === 3 && (
-            <motion.div key="step3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-10 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-10 md:p-14 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+            <motion.div 
+              key="step3" 
+              variants={containerVariants} 
+              initial="hidden" 
+              animate="visible" 
+              exit="exit" 
+              whileHover={{ rotateX: 2, rotateY: -2 }}
+              className="space-y-10 bg-white/[0.08] backdrop-blur-2xl border border-white/20 p-10 md:p-14 rounded-[3rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.3)] relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+              <div className="absolute top-0 left-[-100%] w-[50%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[45deg] animate-[shine_8s_ease-in-out_infinite]" />
 
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 leading-tight">Última pregunta.</h1>
-                <p className="text-white/50 text-lg md:text-xl font-medium">¿A qué has venido al gimnasio? ¿Cuál es tu meta real?</p>
+              <div className="space-y-4 relative z-10">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 leading-[1.1] drop-shadow-lg">Última pregunta.</h1>
+                <p className="text-white/60 text-lg md:text-xl font-medium">¿A qué has venido al gimnasio? ¿Cuál es tu meta real?</p>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-4 relative z-10">
                 {['Ganar fuerza bruta', 'Ganar masa muscular', 'Perder grasa y definir', 'Mantenerme sano'].map((g) => (
                   <motion.button
                     key={g}
-                    whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.06)" }}
+                    whileHover={{ scale: 1.02, x: 5 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => { setGoal(g); finishOnboarding(); }}
-                    className="w-full text-left bg-[#111111]/80 border border-white/[0.06] hover:border-purple-500/50 rounded-2xl px-6 py-5 text-xl font-medium text-white/80 hover:text-white transition-all flex items-center justify-between group shadow-sm"
+                    className="w-full text-left bg-black/20 border border-white/10 hover:border-white/30 hover:bg-black/30 rounded-2xl px-6 py-5 text-xl font-medium text-white/80 hover:text-white transition-all flex items-center justify-between group shadow-sm"
                   >
                     {g}
-                    <ChevronRight size={24} className="text-white/20 group-hover:text-orange-400 transition-colors" />
+                    <ChevronRight size={24} className="text-white/30 group-hover:text-white transition-colors" />
                   </motion.button>
                 ))}
               </div>
@@ -133,10 +179,10 @@ export default function Onboarding() {
           )}
         </AnimatePresence>
 
-        {/* Minimal Progress Bar */}
-        <div className="absolute -bottom-20 inset-x-0 flex justify-center gap-4">
+        {/* Floating Minimal Progress Bar */}
+        <div className="absolute -bottom-24 inset-x-0 flex justify-center gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className={`h-2 rounded-full transition-all duration-500 ease-out ${step >= i ? 'w-12 bg-gradient-to-r from-purple-500 to-orange-400 shadow-[0_0_15px_rgba(139,92,246,0.6)]' : 'w-4 bg-white/10'}`} />
+            <div key={i} className={`h-2 rounded-full transition-all duration-700 ease-out ${step >= i ? 'w-12 bg-white shadow-[0_0_15px_rgba(255,255,255,0.6)]' : 'w-4 bg-white/20'}`} />
           ))}
         </div>
       </div>
