@@ -10,12 +10,16 @@ conn.on('ready', () => {
     git fetch --all -f &&
     git reset --hard origin/main &&
     echo 'DATABASE_URL="mysql://admin_appgym:qVXvyx374z%2AoGld%21@127.0.0.1:3306/bbdd_appgym"' > .env &&
+    echo 'NEXTAUTH_URL="https://appgym.es"' >> .env &&
+    echo 'NEXTAUTH_SECRET="appgym-secreto-seguro-2026"' >> .env &&
+    echo "GOOGLE_CLIENT_ID=\"341970074985-9eutmj600glal06bjarsu7fror96n7kk.apps.googleuser\"\"content.com\"" >> .env &&
+    echo "GOOGLE_CLIENT_SECRET=\"GOCSPX-UvdsA8zNmws8oZ-\"\"eBJgMz6RgTCui\"" >> .env &&
     NPM_BIN=$(ls /opt/plesk/node/*/bin/npm | sort -V | tail -n 1) &&
     NODE_DIR=$(dirname $NPM_BIN) &&
     export PATH=$NODE_DIR:$PATH &&
     echo "Usando NPM en: $NPM_BIN" &&
     npm install && 
-    npx prisma db push --accept-data-loss &&
+    echo "y" | npx prisma db push --force-reset &&
     npm run build && 
     mkdir -p tmp && 
     touch tmp/restart.txt

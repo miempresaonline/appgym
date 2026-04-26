@@ -37,12 +37,12 @@ export default function Onboarding() {
       <div className="w-full max-w-[420px] z-10 relative">
         <AnimatePresence mode="wait">
           {step === 1 && (
-            <motion.div key="step1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+            <motion.div key="step1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-10 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-10 md:p-14 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
               
-              <div className="space-y-3">
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">Hola, soy tu Entrenador.</h1>
-                <p className="text-white/50 text-base md:text-lg">Para ajustar mis algoritmos a tu cuerpo, ¿cómo te llamo?</p>
+              <div className="space-y-4">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 leading-tight">Hola, soy tu <br/> Entrenador.</h1>
+                <p className="text-white/50 text-lg md:text-xl font-medium">Para ajustar mis algoritmos a tu cuerpo, ¿cómo te llamo?</p>
               </div>
 
               <input 
@@ -52,7 +52,7 @@ export default function Onboarding() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && name && nextStep()}
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-2xl px-5 py-4 text-xl font-medium text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-white/[0.06] transition-all"
+                className="w-full bg-[#111111]/80 border border-white/[0.08] rounded-2xl px-6 py-5 text-2xl font-semibold text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-[#1a1a1a] transition-all"
               />
               
               <motion.button 
@@ -60,20 +60,24 @@ export default function Onboarding() {
                 whileTap={{ scale: 0.98 }}
                 onClick={nextStep}
                 disabled={!name}
-                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white font-semibold py-4 px-4 rounded-2xl shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100 group"
+                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-purple-700 via-purple-600 to-orange-500 text-white font-bold py-5 px-6 rounded-2xl shadow-[0_10px_30px_-10px_rgba(139,92,246,0.5)] hover:shadow-[0_15px_40px_-10px_rgba(139,92,246,0.7)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100 group"
+                style={{ backgroundSize: '200% auto', animation: 'gradient 4s linear infinite' }}
               >
-                Continuar <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                <span className="relative z-10 flex items-center justify-center gap-2 text-lg tracking-wide">
+                  CONTINUAR
+                  <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                </span>
               </motion.button>
             </motion.div>
           )}
 
           {step === 2 && (
-            <motion.div key="step2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+            <motion.div key="step2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-10 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-10 md:p-14 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
 
-              <div className="space-y-3">
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">Encantado, <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400">{name}</span>.</h1>
-                <p className="text-white/50 text-base md:text-lg">¿Cuántos años tienes? Lo necesito para medir tu recuperación.</p>
+              <div className="space-y-4">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 leading-tight">Encantado, <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400">{name}</span>.</h1>
+                <p className="text-white/50 text-lg md:text-xl font-medium">¿Cuántos años tienes? Lo necesito para medir tu recuperación.</p>
               </div>
 
               <input 
@@ -83,7 +87,7 @@ export default function Onboarding() {
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && age && nextStep()}
-                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-2xl px-5 py-4 text-xl font-medium text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-white/[0.06] transition-all"
+                className="w-full bg-[#111111]/80 border border-white/[0.08] rounded-2xl px-6 py-5 text-2xl font-semibold text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-[#1a1a1a] transition-all"
               />
               
               <motion.button 
@@ -91,33 +95,37 @@ export default function Onboarding() {
                 whileTap={{ scale: 0.98 }}
                 onClick={nextStep}
                 disabled={!age}
-                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white font-semibold py-4 px-4 rounded-2xl shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100 group"
+                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-purple-700 via-purple-600 to-orange-500 text-white font-bold py-5 px-6 rounded-2xl shadow-[0_10px_30px_-10px_rgba(139,92,246,0.5)] hover:shadow-[0_15px_40px_-10px_rgba(139,92,246,0.7)] transition-all duration-300 disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100 group"
+                style={{ backgroundSize: '200% auto', animation: 'gradient 4s linear infinite' }}
               >
-                Continuar <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                <span className="relative z-10 flex items-center justify-center gap-2 text-lg tracking-wide">
+                  CONTINUAR
+                  <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
+                </span>
               </motion.button>
             </motion.div>
           )}
 
           {step === 3 && (
-            <motion.div key="step3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-8 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+            <motion.div key="step3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="space-y-10 bg-white/[0.02] backdrop-blur-3xl border border-white/[0.05] p-10 md:p-14 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
 
-              <div className="space-y-3">
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">Última pregunta.</h1>
-                <p className="text-white/50 text-base md:text-lg">¿A qué has venido al gimnasio? ¿Cuál es tu meta real?</p>
+              <div className="space-y-4">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-white/50 leading-tight">Última pregunta.</h1>
+                <p className="text-white/50 text-lg md:text-xl font-medium">¿A qué has venido al gimnasio? ¿Cuál es tu meta real?</p>
               </div>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {['Ganar fuerza bruta', 'Ganar masa muscular', 'Perder grasa y definir', 'Mantenerme sano'].map((g) => (
                   <motion.button
                     key={g}
                     whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.06)" }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => { setGoal(g); finishOnboarding(); }}
-                    className="w-full text-left bg-white/[0.03] border border-white/[0.08] hover:border-purple-500/50 rounded-2xl px-5 py-4 text-lg font-medium text-white/80 hover:text-white transition-all flex items-center justify-between group shadow-sm"
+                    className="w-full text-left bg-[#111111]/80 border border-white/[0.06] hover:border-purple-500/50 rounded-2xl px-6 py-5 text-xl font-medium text-white/80 hover:text-white transition-all flex items-center justify-between group shadow-sm"
                   >
                     {g}
-                    <ChevronRight size={20} className="text-white/20 group-hover:text-orange-400 transition-colors" />
+                    <ChevronRight size={24} className="text-white/20 group-hover:text-orange-400 transition-colors" />
                   </motion.button>
                 ))}
               </div>
@@ -126,12 +134,19 @@ export default function Onboarding() {
         </AnimatePresence>
 
         {/* Minimal Progress Bar */}
-        <div className="absolute -bottom-16 inset-x-0 flex justify-center gap-3">
+        <div className="absolute -bottom-20 inset-x-0 flex justify-center gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ease-out ${step >= i ? 'w-10 bg-gradient-to-r from-purple-500 to-orange-400 shadow-[0_0_10px_rgba(139,92,246,0.5)]' : 'w-3 bg-white/10'}`} />
+            <div key={i} className={`h-2 rounded-full transition-all duration-500 ease-out ${step >= i ? 'w-12 bg-gradient-to-r from-purple-500 to-orange-400 shadow-[0_0_15px_rgba(139,92,246,0.6)]' : 'w-4 bg-white/10'}`} />
           ))}
         </div>
       </div>
+      <style jsx global>{`
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
     </div>
   );
 }
