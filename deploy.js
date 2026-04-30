@@ -20,7 +20,7 @@ conn.on('ready', () => {
     export PATH=$NODE_DIR:$PATH &&
     echo "Usando NPM en: $NPM_BIN" &&
     npm install && 
-    echo "y" | npx prisma db push --force-reset &&
+    npx prisma db push --accept-data-loss &&
     npm run build && 
     mkdir -p tmp && 
     touch tmp/restart.txt
