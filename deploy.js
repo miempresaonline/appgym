@@ -14,6 +14,7 @@ conn.on('ready', () => {
     echo 'NEXTAUTH_SECRET="appgym-secreto-seguro-2026"' >> .env &&
     echo "GOOGLE_CLIENT_ID=\"341970074985-9eutmj600glal06bjarsu7fror96n7kk.apps.googleuser\"\"content.com\"" >> .env &&
     echo "GOOGLE_CLIENT_SECRET=\"GOCSPX-UvdsA8zNmws8oZ-\"\"eBJgMz6RgTCui\"" >> .env &&
+    echo "GROQ_API_KEY=\"gsk_5JJEJENLOCliOtRvkCuvWGdyb3FY7FbXDau7voN\"\"esYnoOqEjk3DU\"" >> .env &&
     NPM_BIN=$(ls /opt/plesk/node/*/bin/npm | sort -V | tail -n 1) &&
     NODE_DIR=$(dirname $NPM_BIN) &&
     export PATH=$NODE_DIR:$PATH &&
