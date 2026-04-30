@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { signIn } from "next-auth/react";
-import { Mail, Lock, ArrowRight, Loader2, Dumbbell } from "lucide-react";
+import { Dumbbell } from "lucide-react";
 
 export default function Home() {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,76 +18,88 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-zinc-900/40 via-[#050505] to-[#050505] pointer-events-none" />
-      <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none mix-blend-overlay" />
-
-      {/* Main Content */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[400px] z-10"
-      >
-        {/* Logo/Header */}
-        <div className="flex flex-col items-center mb-10">
-          <motion.div 
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 20 }}
-            className="w-16 h-16 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-center mb-6 shadow-2xl backdrop-blur-sm"
-          >
-            <Dumbbell className="w-8 h-8 text-zinc-100" />
-          </motion.div>
-          <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">
-            {isLogin ? "Bienvenido de nuevo" : "Crea tu cuenta"}
-          </h1>
-          <p className="text-zinc-500 text-sm">
-            {isLogin ? "Inicia sesión para continuar" : "Únete para empezar a entrenar"}
-          </p>
+    <main className="min-h-screen bg-white text-black font-sans flex">
+      {/* Left side: Image/Branding (hidden on mobile) */}
+      <div className="hidden lg:flex flex-col justify-between w-1/2 bg-zinc-100 p-12 relative overflow-hidden">
+        {/* Simple placeholder for a gym image */}
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop" 
+            alt="Gym" 
+            className="w-full h-full object-cover opacity-90"
+          />
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-2">
+            <div className="bg-white text-black p-2 rounded-lg">
+              <Dumbbell className="w-6 h-6" />
+            </div>
+            <span className="text-white font-bold text-xl tracking-tight">APPGYM</span>
+          </div>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-[#0a0a0a]/80 backdrop-blur-xl border border-zinc-800/60 rounded-[32px] p-8 shadow-2xl relative overflow-hidden">
-          {/* Subtle gradient inside card */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-          
-          <form onSubmit={handleSubmit} className="relative z-10 space-y-4">
+        <div className="relative z-10 text-white">
+          <h1 className="text-5xl font-extrabold tracking-tighter mb-4 leading-tight">
+            Entrena de <br />verdad.
+          </h1>
+          <p className="text-lg text-white/80 max-w-md">
+            Lleva el registro de tus rutinas, supera tus límites y alcanza tus objetivos con la plataforma definitiva.
+          </p>
+        </div>
+      </div>
+
+      {/* Right side: Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
+        <div className="w-full max-w-md">
+          <div className="lg:hidden flex items-center gap-2 mb-12">
+            <div className="bg-black text-white p-2 rounded-lg">
+              <Dumbbell className="w-6 h-6" />
+            </div>
+            <span className="text-black font-bold text-xl tracking-tight">APPGYM</span>
+          </div>
+
+          <div className="mb-10">
+            <h2 className="text-3xl font-bold tracking-tight mb-2">
+              {isLogin ? "Iniciar Sesión" : "Crear Cuenta"}
+            </h2>
+            <p className="text-zinc-500">
+              {isLogin ? "Introduce tus datos para acceder" : "Regístrate para empezar a entrenar"}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-4">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <Mail className="w-5 h-5 text-zinc-500" />
-                </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-900 mb-1.5">Email</label>
                 <input
                   type="email"
-                  placeholder="Tu correo electrónico"
+                  placeholder="ejemplo@correo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl py-4 pl-12 pr-4 text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-600 focus:border-zinc-600 transition-all text-sm"
+                  className="w-full bg-white border border-zinc-300 rounded-xl px-4 py-3 text-black placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                   required
                 />
               </div>
               
-              <div className="relative">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <Lock className="w-5 h-5 text-zinc-500" />
-                </div>
+              <div>
+                <label className="block text-sm font-semibold text-zinc-900 mb-1.5">Contraseña</label>
                 <input
                   type="password"
-                  placeholder="Contraseña"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-zinc-900/50 border border-zinc-800 rounded-2xl py-4 pl-12 pr-4 text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-600 focus:border-zinc-600 transition-all text-sm"
+                  className="w-full bg-white border border-zinc-300 rounded-xl px-4 py-3 text-black placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                   required
                 />
               </div>
             </div>
 
             {isLogin && (
-              <div className="flex justify-end mt-2">
-                <button type="button" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
-                  ¿Olvidaste tu contraseña?
+              <div className="flex justify-end">
+                <button type="button" className="text-sm font-medium text-zinc-600 hover:text-black">
+                  ¿Has olvidado tu contraseña?
                 </button>
               </div>
             )}
@@ -96,31 +107,24 @@ export default function Home() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-zinc-100 text-zinc-900 font-medium py-4 rounded-2xl mt-4 hover:bg-white transition-colors flex items-center justify-center gap-2 group disabled:opacity-70"
+              className="w-full bg-black text-white font-semibold py-3.5 rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center disabled:opacity-70"
             >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <span>{isLogin ? "Entrar" : "Registrarse"}</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
+              {isLoading ? "Cargando..." : isLogin ? "Entrar" : "Registrarse"}
             </button>
           </form>
 
-          <div className="relative my-8 z-10">
+          <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-800/80"></div>
+              <div className="w-full border-t border-zinc-200"></div>
             </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-[#0a0a0a] px-4 text-zinc-600">o continuar con</span>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-4 text-zinc-500">O continua con</span>
             </div>
           </div>
 
           <button
             onClick={() => signIn('google')}
-            className="w-full relative z-10 bg-zinc-900/50 border border-zinc-800 text-zinc-300 font-medium py-4 rounded-2xl hover:bg-zinc-800 transition-all flex items-center justify-center gap-3"
+            className="w-full bg-white border border-zinc-300 text-zinc-700 font-semibold py-3.5 rounded-xl hover:bg-zinc-50 transition-colors flex items-center justify-center gap-3"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -128,20 +132,19 @@ export default function Home() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            <span>Google</span>
+            Google
           </button>
-        </div>
 
-        {/* Toggle Login/Register */}
-        <div className="text-center mt-8">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
-          </button>
+          <div className="text-center mt-8">
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm font-medium text-zinc-600 hover:text-black"
+            >
+              {isLogin ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
+            </button>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </main>
   );
 }
