@@ -1,94 +1,128 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
-import { Bot, ArrowRight } from "lucide-react";
+import { ArrowRight, Activity, Heart, Calendar } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardHome() {
   const session = await getServerSession(authOptions);
-  
-  const workoutsThisWeek = 2;
-  const goalDays = 3;
-  const progress = (workoutsThisWeek / goalDays) * 100;
+  const name = session?.user?.name?.split(" ")[0].toUpperCase() || "ALEX";
 
   return (
-    <div className="flex flex-col space-y-2 animate-in fade-in duration-700">
+    <div className="flex flex-col animate-in fade-in duration-700 font-sans pb-32">
       
-      {/* WEEKLY GOAL SECTION */}
-      <div className="flex items-start justify-between mt-2 px-2">
-        <div className="flex flex-col pt-4">
-          <h3 className="text-[#888888] text-[11px] font-bold tracking-[0.15em] uppercase mb-1">Weekly Goal</h3>
-          <div className="flex items-baseline gap-2 mb-4">
-            <span className="text-[56px] leading-[0.8] font-bold text-white tracking-tighter">{goalDays}</span>
-            <span className="text-[#888888] text-sm font-medium tracking-wide uppercase">DAYS/WEEK</span>
+      {/* HEADER SECTION */}
+      <div className="px-6 mt-4 mb-8">
+        <span className="text-[10px] text-zinc-500 font-black tracking-widest uppercase mb-2 block">
+          DAILY MISSION
+        </span>
+        <h2 className="text-5xl font-black italic text-white uppercase leading-[0.9] tracking-tighter">
+          HELLO, {name}.<br/>
+          READY TO <br/>
+          <span className="text-[#8F00FF]">SMASH IT?</span>
+        </h2>
+      </div>
+
+      {/* ACTIVE PROGRAM CARD */}
+      <div className="px-6 mb-12">
+        <div className="relative rounded-[32px] w-full h-[320px] bg-zinc-900 border border-white/5 flex flex-col justify-end p-6">
+          <img 
+            src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1470&auto=format&fit=crop" 
+            alt="Workout" 
+            className="absolute inset-0 w-full h-full object-cover rounded-[32px] opacity-40 mix-blend-luminosity"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent rounded-[32px]"></div>
+          
+          <div className="relative z-10">
+             <span className="text-[#FF6700] text-[10px] font-black uppercase tracking-widest mb-2 block">
+                ACTIVE PROGRAM
+             </span>
+             <h3 className="text-4xl font-black italic text-white uppercase leading-none tracking-tighter mb-3">
+                UPPER BODY<br/>
+                POWER
+             </h3>
+             <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold uppercase tracking-widest">
+                <span>45 MIN</span>
+                <div className="w-1 h-1 rounded-full bg-zinc-600"></div>
+                <span>850 KCAL</span>
+             </div>
           </div>
-          <p className="text-[#a0a0a0] text-sm leading-relaxed max-w-[170px]">
-            You are crushing it. 1 day left to hit your goal.
-          </p>
-        </div>
-        
-        {/* Progress Ring */}
-        <div className="relative w-[130px] h-[130px] flex items-center justify-center shrink-0">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-            {/* Background Track */}
-            <circle cx="50" cy="50" r="42" stroke="#151515" strokeWidth="10" fill="none" />
-            {/* Progress Stroke */}
-            <circle 
-              cx="50" cy="50" r="42" 
-              stroke="#b57aff" 
-              strokeWidth="10" 
-              fill="none" 
-              strokeLinecap="round"
-              strokeDasharray="263.89" 
-              strokeDashoffset={263.89 - (263.89 * progress) / 100}
-              className="transition-all duration-1000 ease-out"
-            />
-          </svg>
-          <div className="absolute flex flex-col items-center justify-center mt-1">
-            <div className="flex items-baseline font-bold tracking-tight">
-              <span className="text-[28px] text-white leading-none">{workoutsThisWeek}</span>
-              <span className="text-[20px] text-white/40 leading-none">/{goalDays}</span>
-            </div>
-            <span className="text-[8px] font-bold text-[#b57aff] tracking-[0.15em] uppercase mt-2">Completed</span>
-          </div>
+
+          <Link href="/dashboard/train" className="absolute -bottom-6 left-6 right-6 bg-[#8F00FF] hover:bg-[#a65cff] text-white py-5 rounded-full flex items-center justify-center font-black italic text-lg uppercase tracking-wide shadow-[0_10px_30px_rgba(143,0,255,0.4)] transition-transform active:scale-95">
+             START WORKOUT
+          </Link>
         </div>
       </div>
 
-      {/* CARDS STACK */}
-      <div className="relative mt-12 h-[280px]">
-        
-        {/* Background Workout Card */}
-        <div className="absolute bottom-0 left-0 right-0 h-[220px] rounded-[36px] p-[1.5px] bg-gradient-to-b from-transparent via-[#b57aff]/20 to-[#b57aff]/80 shadow-[0_0_40px_rgba(181,122,255,0.1)]">
-          <div className="relative bg-[#030303] rounded-[36px] w-full h-full overflow-hidden flex flex-col justify-end p-6">
-            {/* Giant Background Text */}
-            <div className="absolute bottom-12 left-0 right-0 flex justify-center opacity-[0.05] pointer-events-none">
-               <span className="text-[70px] font-black tracking-tighter text-white">WORKOUT</span>
-            </div>
-            
-            <div className="relative z-10 flex justify-center mb-2">
-               <span className="text-[#888888] text-[11px] font-bold tracking-[0.2em] uppercase">UPPER BODY POWER • 45 MIN</span>
-            </div>
-          </div>
+      {/* PERFORMANCE SECTION */}
+      <div className="px-6 mb-10">
+        <div className="flex justify-between items-end mb-4">
+           <h3 className="text-2xl font-black italic text-white tracking-tighter uppercase">PERFORMANCE</h3>
+           <span className="text-[#8F00FF] text-[10px] font-black tracking-widest uppercase">WEEK 04</span>
         </div>
 
-        {/* Foreground AI Card */}
-        <div className="absolute top-0 left-4 right-4 z-10 rounded-[32px] bg-gradient-to-b from-[#2a2438] to-[#121018] border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.9)] p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#352d45] flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-[#b57aff]" />
-                </div>
-                <span className="text-white text-sm font-bold tracking-wide">AppGym AI</span>
+        <div className="flex gap-4">
+           {/* CONSISTENCY CARD */}
+           <div className="flex-1 bg-[#111] border border-white/5 rounded-[24px] p-5 flex flex-col justify-center">
+              <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">CONSISTENCY</span>
+              <div className="text-4xl font-black italic text-white tracking-tighter leading-none mb-2">2<span className="text-zinc-500 text-2xl">/3</span></div>
+              <div className="w-full h-1 bg-white/10 rounded-full mb-3 overflow-hidden">
+                 <div className="h-full w-2/3 bg-[#8F00FF] rounded-full"></div>
               </div>
-              <div className="w-1.5 h-1.5 rounded-full bg-[#ff6b00] shadow-[0_0_10px_#ff6b00]"></div>
-            </div>
-            
-            <p className="text-[#a0a0a0] text-sm leading-relaxed mb-6 pr-4">
-              ¿Qué pasa, gymbro {session?.user?.name?.split(" ")[0] || "!"}? Según los kilos que moviste la semana pasada, hoy toca enfocar el entreno en hipertrofia controlada.
-            </p>
+              <span className="text-zinc-500 text-[9px] font-black uppercase tracking-widest leading-none">DAYS<br/>COMPLETED</span>
+           </div>
 
-            <Link href="/dashboard/ai" className="flex items-center gap-2 text-[11px] font-bold text-[#b57aff] uppercase tracking-widest hover:text-white transition-colors">
-              VIEW INSIGHTS <ArrowRight className="w-4 h-4 ml-1" />
-            </Link>
+           {/* AVG HR CARD */}
+           <div className="flex-1 bg-[#111] border border-white/5 rounded-[24px] p-5 flex flex-col justify-between">
+              <div className="flex justify-between items-start mb-2">
+                 <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">AVG HR</span>
+                 <Heart className="w-4 h-4 text-[#FF6700]" />
+              </div>
+              <div className="text-4xl font-black italic text-white tracking-tighter leading-none mb-3">142</div>
+              <div className="flex items-end gap-1.5 h-6">
+                 <div className="w-4 h-2 rounded-full bg-[#FF6700]/30"></div>
+                 <div className="w-4 h-3 rounded-full bg-[#FF6700]/50"></div>
+                 <div className="w-4 h-4 rounded-full bg-[#FF6700]/70"></div>
+                 <div className="w-5 h-6 rounded-full bg-[#FF6700] shadow-[0_0_10px_rgba(255,103,0,0.4)]"></div>
+              </div>
+           </div>
+        </div>
+      </div>
+
+      {/* LOGGED ACTIVITY SECTION */}
+      <div className="px-6">
+        <div className="flex justify-between items-end mb-4">
+           <h3 className="text-2xl font-black italic text-white tracking-tighter uppercase">LOGGED ACTIVITY</h3>
+           <span className="text-zinc-500 text-[10px] font-black tracking-widest uppercase">SEE ALL</span>
+        </div>
+
+        <div className="space-y-3">
+           <div className="bg-[#111] border border-white/5 rounded-[24px] p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
+                 <Activity className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                 <h4 className="font-black italic text-white text-lg uppercase tracking-tight">LEGS & CORE</h4>
+                 <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">YESTERDAY • 58 MIN</span>
+              </div>
+              <div className="text-right">
+                 <span className="font-black italic text-white text-lg">PR</span><br/>
+                 <span className="text-[#FF6700] text-[10px] font-black uppercase tracking-widest">+12% VOL</span>
+              </div>
+           </div>
+
+           <div className="bg-[#111] border border-white/5 rounded-[24px] p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
+                 <Activity className="w-5 h-5 text-[#8F00FF]" />
+              </div>
+              <div className="flex-1">
+                 <h4 className="font-black italic text-zinc-400 text-lg uppercase tracking-tight">RECOVERY RUN</h4>
+                 <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">2 DAYS AGO • 32 MIN</span>
+              </div>
+              <div className="text-right">
+                 <span className="font-black italic text-zinc-400 text-lg">5K</span><br/>
+                 <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">STEADY</span>
+              </div>
+           </div>
         </div>
       </div>
 

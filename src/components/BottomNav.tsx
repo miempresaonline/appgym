@@ -15,8 +15,8 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-20 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/5 z-50 px-6">
-      <div className="flex justify-between items-center h-full max-w-md mx-auto">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 h-16 bg-[#111]/90 backdrop-blur-xl border border-white/5 rounded-full z-50 px-6 shadow-2xl">
+      <div className="flex justify-between items-center h-full gap-8">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -24,9 +24,9 @@ export default function BottomNav() {
             <Link 
               key={item.name} 
               href={item.href}
-              className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all ${isActive ? 'bg-[#1a1525] text-brand-purple shadow-[0_0_15px_rgba(143,0,255,0.2)]' : 'text-zinc-500 hover:text-zinc-300'}`}
+              className={`flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all ${isActive ? 'bg-[#8F00FF]/20 text-[#8F00FF]' : 'text-zinc-600 hover:text-zinc-300'}`}
             >
-              <Icon className={`w-6 h-6 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
+              <Icon className={`w-6 h-6 ${isActive ? 'fill-[#8F00FF]/20' : ''}`} />
             </Link>
           );
         })}

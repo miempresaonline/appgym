@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Bebas_Neue } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"], variable: "--font-bebas" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
   title: "APPGYM - Entrenador Invisible",
@@ -22,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <body
-        className={`${inter.variable} ${bebas.variable} font-sans bg-[#0a0a0a] text-white antialiased selection:bg-brand-orange/30 selection:text-brand-orange`}
+        className={`${inter.variable} font-sans bg-[#050505] text-white antialiased selection:bg-brand-orange/30 selection:text-brand-orange`}
       >
         <Providers>
           <main className="min-h-screen w-full relative">
