@@ -45,6 +45,7 @@ export default function WorkoutApp() {
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Timer State (Bulletproof using absolute time)
   const [timerEndTime, setTimerEndTime] = useState<number | null>(null);
