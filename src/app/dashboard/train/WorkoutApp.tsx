@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { X, Plus, Clock, Bot, ChevronRight, Play, CheckCircle2, ChevronDown, Check, Activity, Dumbbell, User2, Bell, RefreshCcw } from "lucide-react";
+import { X, Plus, Clock, Bot, ChevronRight, Play, CheckCircle2, ChevronDown, Check, Activity, Dumbbell, User2, Bell, RefreshCcw, Camera } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type TrackingType = "WEIGHT_REPS" | "REPS_ONLY" | "TIME" | "UNILATERAL";
