@@ -7,11 +7,11 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Home", href: "/dashboard", icon: Home },
-    { name: "Train", href: "/dashboard/train", icon: Dumbbell },
-    { name: "Progress", href: "/dashboard/progress", icon: LineChart },
-    { name: "Routines", href: "/dashboard/routines", icon: ClipboardList },
-    { name: "AI Coach", href: "/dashboard/ai", icon: Bot },
+    { name: "Inicio", href: "/dashboard", icon: Home },
+    { name: "Entrenar", href: "/dashboard/train", icon: Dumbbell },
+    { name: "Progreso", href: "/dashboard/progress", icon: LineChart },
+    { name: "Rutinas", href: "/dashboard/routines", icon: ClipboardList },
+    { name: "Coach IA", href: "/dashboard/ai", icon: Bot },
   ];
 
   return (

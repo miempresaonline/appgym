@@ -5,40 +5,40 @@ import Link from "next/link";
 
 export default async function DashboardHome() {
   const session = await getServerSession(authOptions);
-  const name = session?.user?.name?.split(" ")[0].toUpperCase() || "ALEX";
+  const name = session?.user?.name?.split(" ")[0].toUpperCase() || "ÁLEX";
 
   return (
     <div className="flex flex-col animate-in fade-in duration-700 font-sans pb-32">
       
       {/* HEADER SECTION */}
-      <div className="px-6 mt-4 mb-8">
+      <div className="px-6 mt-4 mb-8 animate-in slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
         <span className="text-[10px] text-zinc-500 font-black tracking-widest uppercase mb-2 block">
-          DAILY MISSION
+          MISIÓN DIARIA
         </span>
         <h2 className="text-5xl font-black italic text-white uppercase leading-[0.9] tracking-tighter">
-          HELLO, {name}.<br/>
-          READY TO <br/>
-          <span className="text-[#a855f7]">SMASH IT?</span>
+          HOLA, {name}.<br/>
+          ¿LISTO PARA <br/>
+          <span className="text-[#a855f7]">ROMPERLA?</span>
         </h2>
       </div>
 
       {/* ACTIVE PROGRAM CARD */}
-      <div className="px-6 mb-8">
-        <div className="relative rounded-[32px] w-full h-[320px] bg-zinc-900 border border-white/5 flex flex-col justify-end p-6 mb-4">
+      <div className="px-6 mb-8 animate-in slide-in-from-bottom-8 duration-500 delay-200 fill-mode-both">
+        <div className="relative rounded-[32px] w-full h-[320px] bg-zinc-900 border border-white/5 flex flex-col justify-end p-6 mb-4 overflow-hidden">
           <img 
             src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1470&auto=format&fit=crop" 
             alt="Workout" 
-            className="absolute inset-0 w-full h-full object-cover rounded-[32px] opacity-40 mix-blend-luminosity"
+            className="absolute inset-0 w-full h-full object-cover rounded-[32px] opacity-40 mix-blend-luminosity scale-105 transition-transform duration-1000"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent rounded-[32px]"></div>
           
           <div className="relative z-10">
              <span className="text-[#FF6700] text-[10px] font-black uppercase tracking-widest mb-2 block">
-                ACTIVE PROGRAM
+                PROGRAMA ACTIVO
              </span>
              <h3 className="text-4xl font-black italic text-white uppercase leading-none tracking-tighter mb-3 drop-shadow-md">
-                UPPER BODY<br/>
-                POWER
+                TORSO<br/>
+                FUERZA
              </h3>
              <div className="flex items-center gap-2 text-zinc-300 text-xs font-bold uppercase tracking-widest">
                 <span>45 MIN</span>
@@ -48,32 +48,32 @@ export default async function DashboardHome() {
           </div>
         </div>
         <Link href="/dashboard/train" className="w-full bg-[#a855f7] hover:bg-[#b57aff] text-white py-5 rounded-full flex items-center justify-center font-black italic text-lg uppercase tracking-wide shadow-[0_10px_30px_rgba(168,85,247,0.3)] transition-transform active:scale-95">
-           START WORKOUT
+           EMPEZAR ENTRENO
         </Link>
       </div>
 
       {/* PERFORMANCE SECTION */}
-      <div className="px-6 mb-10">
+      <div className="px-6 mb-10 animate-in slide-in-from-bottom-8 duration-500 delay-300 fill-mode-both">
         <div className="flex justify-between items-end mb-4">
-           <h3 className="text-2xl font-black italic text-white tracking-tighter uppercase">PERFORMANCE</h3>
-           <span className="text-[#8F00FF] text-[10px] font-black tracking-widest uppercase">WEEK 04</span>
+           <h3 className="text-2xl font-black italic text-white tracking-tighter uppercase">RENDIMIENTO</h3>
+           <span className="text-[#a855f7] text-[10px] font-black tracking-widest uppercase">SEMANA 04</span>
         </div>
 
         <div className="flex gap-4">
            {/* CONSISTENCY CARD */}
            <div className="flex-1 bg-[#111] border border-white/5 rounded-[24px] p-5 flex flex-col justify-center">
-              <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">CONSISTENCY</span>
+              <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">CONSTANCIA</span>
               <div className="text-4xl font-black italic text-white tracking-tighter leading-none mb-2">2<span className="text-zinc-500 text-2xl">/3</span></div>
               <div className="w-full h-1 bg-white/10 rounded-full mb-3 overflow-hidden">
-                 <div className="h-full w-2/3 bg-[#8F00FF] rounded-full"></div>
+                 <div className="h-full w-2/3 bg-[#a855f7] rounded-full"></div>
               </div>
-              <span className="text-zinc-500 text-[9px] font-black uppercase tracking-widest leading-none">DAYS<br/>COMPLETED</span>
+              <span className="text-zinc-500 text-[9px] font-black uppercase tracking-widest leading-none">DÍAS<br/>COMPLETADOS</span>
            </div>
 
            {/* AVG HR CARD */}
            <div className="flex-1 bg-[#111] border border-white/5 rounded-[24px] p-5 flex flex-col justify-between">
               <div className="flex justify-between items-start mb-2">
-                 <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">AVG HR</span>
+                 <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">FC MED</span>
                  <Heart className="w-4 h-4 text-[#FF6700]" />
               </div>
               <div className="text-4xl font-black italic text-white tracking-tighter leading-none mb-3">142</div>
@@ -88,10 +88,10 @@ export default async function DashboardHome() {
       </div>
 
       {/* LOGGED ACTIVITY SECTION */}
-      <div className="px-6">
+      <div className="px-6 animate-in slide-in-from-bottom-8 duration-500 delay-500 fill-mode-both">
         <div className="flex justify-between items-end mb-4">
-           <h3 className="text-2xl font-black italic text-white tracking-tighter uppercase">LOGGED ACTIVITY</h3>
-           <span className="text-zinc-500 text-[10px] font-black tracking-widest uppercase">SEE ALL</span>
+           <h3 className="text-2xl font-black italic text-white tracking-tighter uppercase">HISTORIAL</h3>
+           <span className="text-zinc-500 text-[10px] font-black tracking-widest uppercase">VER TODO</span>
         </div>
 
         <div className="space-y-3">
@@ -100,8 +100,8 @@ export default async function DashboardHome() {
                  <Activity className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
-                 <h4 className="font-black italic text-white text-lg uppercase tracking-tight">LEGS & CORE</h4>
-                 <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">YESTERDAY • 58 MIN</span>
+                 <h4 className="font-black italic text-white text-lg uppercase tracking-tight">PIERNAS Y CORE</h4>
+                 <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">AYER • 58 MIN</span>
               </div>
               <div className="text-right">
                  <span className="font-black italic text-white text-lg">PR</span><br/>
@@ -111,15 +111,15 @@ export default async function DashboardHome() {
 
            <div className="bg-[#111] border border-white/5 rounded-[24px] p-5 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
-                 <Activity className="w-5 h-5 text-[#8F00FF]" />
+                 <Activity className="w-5 h-5 text-[#a855f7]" />
               </div>
               <div className="flex-1">
-                 <h4 className="font-black italic text-zinc-400 text-lg uppercase tracking-tight">RECOVERY RUN</h4>
-                 <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">2 DAYS AGO • 32 MIN</span>
+                 <h4 className="font-black italic text-zinc-400 text-lg uppercase tracking-tight">CARRERA SUAVE</h4>
+                 <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">HACE 2 DÍAS • 32 MIN</span>
               </div>
               <div className="text-right">
                  <span className="font-black italic text-zinc-400 text-lg">5K</span><br/>
-                 <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">STEADY</span>
+                 <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">RELAX</span>
               </div>
            </div>
         </div>

@@ -36,7 +36,7 @@ export default function WorkoutApp() {
   // Timer State
   const [timerEndTime, setTimerEndTime] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [aiTip, setAiTip] = useState<string>("Buscando conexión con la mente...");
+  const [aiTip, setAiTip] = useState<string>("Conectando con tus músculos...");
   const defaultRest = 90; // 1.5 mins
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,7 +107,7 @@ export default function WorkoutApp() {
        })
        .then(r => r.json())
        .then(d => { if (d.tip) setAiTip(d.tip); })
-       .catch(() => setAiTip("Push to failure, let's go! Focus on eccentric control."));
+       .catch(() => setAiTip("¡No pares ahora! Controla la excéntrica y empuja fuerte."));
     }
     setTimerEndTime(Date.now() + defaultRest * 1000);
   };
@@ -124,7 +124,7 @@ export default function WorkoutApp() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: "KINETIC WORKOUT",
+          name: "ENTRENO KINETIC",
           exercises: validExercises
         })
       });
@@ -155,19 +155,19 @@ export default function WorkoutApp() {
     const word2 = words.slice(1).join(" ");
 
     return (
-      <div className="fixed inset-0 bg-[#050505] z-50 flex flex-col font-sans">
+      <div className="fixed inset-0 bg-[#050505] z-50 flex flex-col font-sans animate-in fade-in duration-300">
         {/* HEADER */}
-        <div className="flex justify-between items-center p-6">
-          <button onClick={() => setActiveExerciseId(null)} className="text-zinc-400 p-2">
+        <div className="flex justify-between items-center p-6 bg-[#050505]/80 backdrop-blur-xl z-10 sticky top-0">
+          <button onClick={() => setActiveExerciseId(null)} className="text-zinc-400 p-2 hover:bg-white/5 rounded-full transition-colors">
             <X className="w-6 h-6" />
           </button>
-          <div className="bg-white/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-300">
-            ACTIVE WORKOUT
+          <div className="bg-[#111] border border-white/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-300 shadow-md">
+            ENTRENO ACTIVO
           </div>
         </div>
 
         {/* IMAGE & TITLE CARD */}
-        <div className="px-6 relative">
+        <div className="px-6 relative animate-in slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
            <div className="relative h-64 rounded-[32px] overflow-hidden bg-zinc-900 border border-white/5">
               <input type="file" ref={fileInputRef} onChange={(e) => {
                  const file = e.target.files?.[0];
@@ -179,10 +179,11 @@ export default function WorkoutApp() {
               }} accept="image/*" capture="environment" className="hidden" />
               
               {activeEx.photoUrl ? (
-                 <img src={activeEx.photoUrl} className="w-full h-full object-cover" onClick={() => fileInputRef.current?.click()} />
+                 <img src={activeEx.photoUrl} className="w-full h-full object-cover scale-105 transition-transform duration-1000" onClick={() => fileInputRef.current?.click()} />
               ) : (
-                 <div className="w-full h-full bg-[#111] flex items-center justify-center cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                    <Camera className="w-10 h-10 text-white/10" />
+                 <div className="w-full h-full bg-[#111] flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 transition-colors" onClick={() => fileInputRef.current?.click()}>
+                    <Camera className="w-10 h-10 text-white/10 mb-2" />
+                    <span className="text-zinc-700 font-bold uppercase tracking-widest text-[10px]">AÑADIR FOTO</span>
                  </div>
               )}
               
@@ -201,44 +202,44 @@ export default function WorkoutApp() {
         <div className="flex-1 flex flex-col px-6 pt-6 gap-6 overflow-y-auto no-scrollbar pb-32">
            
            {/* CURRENT SET CARD */}
-           <div className="bg-[#111] rounded-[32px] p-8 flex flex-col items-center justify-center border border-white/5 relative shadow-xl">
+           <div className="bg-[#111] rounded-[32px] p-8 flex flex-col items-center justify-center border border-white/5 relative shadow-xl animate-in slide-in-from-bottom-8 duration-500 delay-200 fill-mode-both">
               <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">
-                 CURRENT SET ({currentSetIndex+1}/{Math.max(currentSetIndex+1, activeEx.sets.filter(s => s.completed).length)})
+                 SERIE ACTUAL ({currentSetIndex+1}/{Math.max(currentSetIndex+1, activeEx.sets.filter(s => s.completed).length)})
               </div>
               
-              <div className="flex items-baseline gap-4">
-                 <div className="flex items-baseline">
-                    <input type="text" inputMode="decimal" value={activeSet.weight || "0"} onChange={e => updateSet(activeEx.id, currentSetIndex, "weight", e.target.value)} disabled={isCompletedAll || isTimerRunning} className="bg-transparent text-white text-7xl font-black italic w-28 text-center outline-none p-0 m-0" />
-                    <span className="text-zinc-500 text-2xl font-black italic ml-1 uppercase">KG</span>
+              <div className="flex items-center gap-4 w-full">
+                 <div className="flex-1 bg-[#1a1a1a] rounded-2xl p-4 border border-white/10 focus-within:border-white/30 transition-colors flex flex-col items-center">
+                    <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">PESO (KG)</span>
+                    <input type="number" inputMode="decimal" value={activeSet.weight || ""} onChange={e => updateSet(activeEx.id, currentSetIndex, "weight", e.target.value)} disabled={isCompletedAll || isTimerRunning} className="bg-transparent text-white text-5xl font-black italic text-center w-full outline-none p-0 m-0" placeholder="0" />
                  </div>
                  
                  <span className="text-zinc-600 text-3xl font-black italic">×</span>
                  
-                 <div className="flex items-baseline">
-                    <input type="text" inputMode="decimal" value={activeSet.reps || "0"} onChange={e => updateSet(activeEx.id, currentSetIndex, "reps", e.target.value)} disabled={isCompletedAll || isTimerRunning} className="bg-transparent text-[#a855f7] text-7xl font-black italic w-20 text-center outline-none p-0 m-0 drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]" />
-                    <span className="text-zinc-500 text-2xl font-black italic ml-1 uppercase">R</span>
+                 <div className="flex-1 bg-[#a855f7]/10 rounded-2xl p-4 border border-[#a855f7]/30 focus-within:border-[#a855f7] transition-colors flex flex-col items-center">
+                    <span className="text-[#a855f7] text-[10px] font-black uppercase tracking-widest mb-1">REPS</span>
+                    <input type="number" inputMode="decimal" value={activeSet.reps || ""} onChange={e => updateSet(activeEx.id, currentSetIndex, "reps", e.target.value)} disabled={isCompletedAll || isTimerRunning} className="bg-transparent text-[#a855f7] text-5xl font-black italic text-center w-full outline-none p-0 m-0 drop-shadow-[0_0_10px_rgba(168,85,247,0.4)]" placeholder="0" />
                  </div>
               </div>
            </div>
 
            {/* TIMER OR HISTORY */}
            {isTimerRunning ? (
-              <div className="flex flex-col items-center justify-center gap-6 mt-4">
+              <div className="flex flex-col items-center justify-center gap-6 mt-4 animate-in zoom-in-95 duration-500">
                  <div className="relative w-40 h-40 flex items-center justify-center">
                     <svg className="absolute w-full h-full -rotate-90" viewBox="0 0 100 100">
                        <circle cx="50" cy="50" r="46" stroke="#111" strokeWidth="6" fill="none" />
                        <circle cx="50" cy="50" r="46" stroke="#FF6700" strokeWidth="6" fill="none" strokeLinecap="round" strokeDasharray="289" strokeDashoffset={289 - (289 * (timeLeft / defaultRest))} className="transition-all duration-500 ease-linear" />
                     </svg>
                     <div className="flex flex-col items-center z-10">
-                       <span className="text-brand-orange text-[10px] font-black tracking-widest uppercase mb-1">REST</span>
+                       <span className="text-brand-orange text-[10px] font-black tracking-widest uppercase mb-1">DESCANSO</span>
                        <span className="text-4xl font-black italic text-white tracking-tighter">{formatTime(timeLeft)}</span>
                     </div>
                  </div>
 
-                 <div className="bg-[#111]/80 backdrop-blur-xl border border-[#8F00FF]/30 p-5 rounded-[24px] flex items-start gap-4 relative overflow-hidden shadow-[0_0_20px_rgba(143,0,255,0.1)]">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#8F00FF]"></div>
-                    <div className="w-8 h-8 rounded-full bg-[#8F00FF]/20 flex items-center justify-center shrink-0">
-                       <Bot className="w-4 h-4 text-[#8F00FF]" />
+                 <div className="bg-[#111]/80 backdrop-blur-xl border border-[#a855f7]/30 p-5 rounded-[24px] flex items-start gap-4 relative overflow-hidden shadow-[0_0_20px_rgba(168,85,247,0.1)]">
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#a855f7]"></div>
+                    <div className="w-8 h-8 rounded-full bg-[#a855f7]/20 flex items-center justify-center shrink-0">
+                       <Bot className="w-4 h-4 text-[#a855f7]" />
                     </div>
                     <div>
                        <div className="flex items-center gap-2 mb-1">
@@ -250,16 +251,20 @@ export default function WorkoutApp() {
                  </div>
               </div>
            ) : (
-              <div className="mt-4">
-                 <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-4">PREVIOUS SETS</h3>
+              <div className="mt-4 animate-in slide-in-from-bottom-8 duration-500 delay-300 fill-mode-both">
+                 <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-4">SERIES ANTERIORES</h3>
                  <div className="space-y-2">
                     {activeEx.sets.map((s, idx) => s.completed && (
                        <div key={idx} className="flex justify-between items-center bg-[#111] px-5 py-4 rounded-[20px] border border-white/5">
-                          <span className="text-zinc-500 font-black italic uppercase">Set {idx+1}</span>
+                          <span className="text-zinc-500 font-black italic uppercase">SERIE {idx+1}</span>
                           <span className="text-white font-black italic text-lg">{s.weight}KG <span className="text-zinc-600">×</span> <span className="text-[#a855f7]">{s.reps}R</span></span>
                        </div>
                     ))}
-                    {!activeEx.sets.some(s => s.completed) && <p className="text-zinc-600 text-sm italic font-medium">No sets completed yet.</p>}
+                    {!activeEx.sets.some(s => s.completed) && (
+                      <div className="bg-[#1a1a1a]/50 p-4 rounded-[20px] border border-white/5 text-center">
+                         <p className="text-zinc-600 text-sm italic font-medium">Aún no hay series.</p>
+                      </div>
+                    )}
                  </div>
               </div>
            )}
@@ -269,11 +274,11 @@ export default function WorkoutApp() {
         <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent">
            {isTimerRunning ? (
               <button onClick={() => setTimerEndTime(null)} className="w-full bg-[#111] text-brand-orange border border-brand-orange/30 font-black italic text-xl uppercase py-5 rounded-[24px] shadow-[0_0_30px_rgba(255,103,0,0.1)] transition-transform active:scale-95">
-                 SKIP REST
+                 SALTAR DESCANSO
               </button>
            ) : (
-              <button onClick={() => completeSet(activeEx.id, currentSetIndex)} disabled={isCompletedAll || !activeSet.reps} className="w-full bg-[#8F00FF] hover:bg-[#a65cff] disabled:bg-[#111] disabled:text-zinc-600 text-white font-black italic text-xl uppercase py-5 rounded-[24px] flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(143,0,255,0.4)] disabled:shadow-none transition-transform active:scale-95">
-                 <CheckCircle2 className="w-6 h-6" /> COMPLETE SET
+              <button onClick={() => completeSet(activeEx.id, currentSetIndex)} disabled={isCompletedAll || !activeSet.reps} className="w-full bg-[#a855f7] hover:bg-[#b57aff] disabled:bg-[#111] disabled:text-zinc-600 text-white font-black italic text-xl uppercase py-5 rounded-[24px] flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(168,85,247,0.4)] disabled:shadow-none transition-transform active:scale-95">
+                 <CheckCircle2 className="w-6 h-6" /> COMPLETAR SERIE
               </button>
            )}
         </div>
@@ -283,21 +288,24 @@ export default function WorkoutApp() {
 
   // --- WORKOUT LIST (MAIN DASHBOARD) ---
   return (
-    <div className="flex flex-col min-h-screen bg-[#050505] animate-in fade-in pb-32 font-sans">
+    <div className="flex flex-col min-h-screen bg-[#050505] font-sans">
       
+      {/* ADD EXERCISE MODAL */}
       {showAddModal && (
-         <div className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-[60] p-6 flex flex-col justify-end animate-in slide-in-from-bottom-full">
-            <div className="bg-[#111] border border-white/5 rounded-[40px] p-6 w-full mb-6">
+         <div className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-[60] p-6 flex flex-col justify-end">
+            <div className="bg-[#111] border border-white/5 rounded-[40px] p-6 w-full mb-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-2xl font-black italic text-white uppercase tracking-tighter">ADD EXERCISE</h3>
-                  <button onClick={() => setShowAddModal(false)} className="p-2 bg-white/5 rounded-full"><X className="w-5 h-5 text-white"/></button>
+                  <h3 className="text-2xl font-black italic text-white uppercase tracking-tighter">AÑADIR EJERCICIO</h3>
+                  <button onClick={() => setShowAddModal(false)} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
+                     <X className="w-5 h-5 text-white"/>
+                  </button>
                </div>
-               <div className="space-y-3">
-                  {["BENCH PRESS", "SQUAT", "DEADLIFT", "SHOULDER PRESS", "BICEP CURL", "LAT PULLDOWN"].map(name => (
+               <div className="space-y-3 max-h-[60vh] overflow-y-auto no-scrollbar">
+                  {["PRESS DE BANCA", "SENTADILLA", "PESO MUERTO", "PRESS MILITAR", "CURL DE BÍCEPS", "JALÓN AL PECHO"].map(name => (
                      <button key={name} onClick={() => {
                         setExercises([...exercises, { id: Date.now().toString(), name, trackingType: "WEIGHT_REPS", sets: [{ weight: "", reps: "", completed: false }] }]);
                         setShowAddModal(false);
-                     }} className="w-full text-left p-4 bg-[#1a1a1a] rounded-[24px] text-white font-black italic text-xl uppercase hover:bg-[#8F00FF]/20 hover:text-[#8F00FF] transition-colors">
+                     }} className="w-full text-left p-4 bg-[#1a1a1a] rounded-[24px] text-white font-black italic text-xl uppercase hover:bg-[#a855f7]/20 hover:text-[#a855f7] border border-transparent hover:border-[#a855f7]/30 transition-all">
                         {name}
                      </button>
                   ))}
@@ -307,28 +315,28 @@ export default function WorkoutApp() {
       )}
 
       {/* HEADER PRINCIPAL */}
-      <div className="flex justify-between items-center p-6 sticky top-0 bg-[#050505]/90 backdrop-blur-xl z-10">
+      <div className="flex justify-between items-center p-6 pt-10 sticky top-0 bg-[#050505]/90 backdrop-blur-xl z-10 animate-in fade-in duration-500">
         <div className="flex items-center gap-3">
            <div className="w-10 h-10 rounded-full bg-[#111] border border-white/10 flex items-center justify-center"><User2 className="w-5 h-5 text-white" /></div>
-           <h1 className="text-xl font-black uppercase tracking-tighter italic text-[#8F00FF]">KINETIC</h1>
+           <h1 className="text-xl font-black uppercase tracking-tighter italic text-[#a855f7]">APP GYM</h1>
         </div>
-        <button className="text-[#8F00FF]"><Bell className="w-6 h-6" /></button>
+        <button className="text-[#a855f7] p-2 hover:bg-[#a855f7]/10 rounded-full transition-colors"><Bell className="w-6 h-6" /></button>
       </div>
 
-      <div className="px-6 pt-4">
+      <div className="px-6 pt-4 pb-32">
         {/* TITULO GIGANTE */}
-        <div className="mb-10 pt-4">
-          <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em] mb-2">ACTIVE SESSION</p>
+        <div className="mb-10 animate-in slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
+          <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em] mb-2">SESIÓN ACTIVA</p>
           <h2 className="text-5xl font-black italic text-white uppercase leading-[0.9] tracking-tighter">
-            LET'S <span className="text-[#a855f7]">SMASH IT.</span><br/>
-            NO EXCUSES.
+            A DARLE <span className="text-[#a855f7]">DURO.</span><br/>
+            CERO EXCUSAS.
           </h2>
         </div>
 
         {exercises.length === 0 ? (
-          <div className="h-64 flex flex-col items-center justify-center bg-[#111] border border-white/5 rounded-[40px]">
+          <div className="h-64 flex flex-col items-center justify-center bg-[#111] border border-white/5 rounded-[40px] animate-in zoom-in-95 duration-500 delay-200 fill-mode-both">
             <Dumbbell className="w-12 h-12 text-zinc-700 mb-4" />
-            <p className="text-lg font-black italic text-zinc-500 tracking-widest">NO EXERCISES YET</p>
+            <p className="text-lg font-black italic text-zinc-500 tracking-widest">AÚN NO HAY EJERCICIOS</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -336,15 +344,15 @@ export default function WorkoutApp() {
               const currentSetIndex = ex.sets.findIndex(s => !s.completed);
               const isDone = currentSetIndex === -1;
               return (
-                 <div key={ex.id} onClick={() => setActiveExerciseId(ex.id)} className={`p-6 rounded-[32px] cursor-pointer relative z-10 transition-colors ${isDone ? 'bg-[#8F00FF]/10 border border-[#8F00FF]/30' : 'bg-[#111] border border-white/5'}`}>
+                 <div key={ex.id} onClick={() => setActiveExerciseId(ex.id)} className={`p-6 rounded-[32px] cursor-pointer relative z-10 transition-colors animate-in slide-in-from-bottom-4 duration-500 fill-mode-both ${isDone ? 'bg-[#a855f7]/10 border border-[#a855f7]/30' : 'bg-[#111] border border-white/5'}`} style={{ animationDelay: `${200 + idx * 100}ms` }}>
                    <div className="flex justify-between items-center mb-4">
                      <h3 className="font-black italic text-3xl text-white tracking-tighter uppercase">{ex.name}</h3>
-                     {isDone ? <CheckCircle2 className="w-6 h-6 text-[#8F00FF]" /> : <ChevronRight className="w-6 h-6 text-zinc-600" />}
+                     {isDone ? <CheckCircle2 className="w-6 h-6 text-[#a855f7]" /> : <ChevronRight className="w-6 h-6 text-zinc-600" />}
                    </div>
                    
                    <div className="flex gap-2">
                      {ex.sets.map((set, i) => (
-                        <div key={i} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black italic ${set.completed ? 'bg-[#8F00FF] text-white shadow-[0_0_10px_rgba(143,0,255,0.4)]' : 'bg-white/5 text-zinc-600'}`}>
+                        <div key={i} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black italic transition-colors ${set.completed ? 'bg-[#a855f7] text-white shadow-[0_0_10px_rgba(168,85,247,0.4)]' : 'bg-[#1a1a1a] text-zinc-500 border border-white/5'}`}>
                            {i+1}
                         </div>
                      ))}
@@ -355,15 +363,15 @@ export default function WorkoutApp() {
           </div>
         )}
 
-        <button onClick={() => setShowAddModal(true)} className="mt-6 mb-8 w-full bg-[#1a1a1a] text-white h-[88px] rounded-[32px] flex items-center justify-center font-black italic uppercase tracking-wider text-xl hover:bg-[#8F00FF]/20 hover:text-[#8F00FF] transition-all">
-          <Plus className="w-6 h-6 mr-2" /> ADD EXERCISE
+        <button onClick={() => setShowAddModal(true)} className="mt-8 mb-8 w-full bg-[#1a1a1a] text-white h-[88px] rounded-[32px] flex items-center justify-center font-black italic uppercase tracking-wider text-xl hover:bg-[#a855f7]/20 hover:text-[#a855f7] border border-transparent hover:border-[#a855f7]/30 transition-all animate-in slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
+          <Plus className="w-6 h-6 mr-2" /> AÑADIR EJERCICIO
         </button>
 
       {/* START WORKOUT BUTTON (IN FLOW) */}
       {exercises.length > 0 && (
-         <div className="pb-8">
+         <div className="pb-8 animate-in slide-in-from-bottom-4 duration-500 delay-400 fill-mode-both">
             <button onClick={saveWorkout} disabled={isSaving} className="w-full bg-[#a855f7] hover:bg-[#b57aff] text-white font-black italic text-xl uppercase py-5 rounded-[24px] shadow-[0_0_40px_rgba(168,85,247,0.3)] active:scale-95 transition-transform flex justify-center items-center gap-2">
-               {isSaving ? <RefreshCcw className="w-6 h-6 animate-spin" /> : 'FINISH WORKOUT'}
+               {isSaving ? <RefreshCcw className="w-6 h-6 animate-spin" /> : 'TERMINAR ENTRENO'}
             </button>
          </div>
       )}
