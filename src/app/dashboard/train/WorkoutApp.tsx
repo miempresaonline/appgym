@@ -186,12 +186,12 @@ export default function WorkoutApp() {
                  </div>
               )}
               
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#050505] pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent pointer-events-none"></div>
               
               <div className="absolute bottom-6 left-6 pointer-events-none">
-                 <h2 className="text-5xl font-black italic text-white uppercase leading-none tracking-tight">
+                 <h2 className="text-5xl font-black italic text-white uppercase leading-[0.9] tracking-tighter drop-shadow-md">
                     {word1} <br/>
-                    {word2 && <span className="text-[#8F00FF]">{word2}</span>}
+                    {word2 && <span className="text-[#a855f7]">{word2}</span>}
                  </h2>
               </div>
            </div>
@@ -215,7 +215,7 @@ export default function WorkoutApp() {
                  <span className="text-zinc-600 text-3xl font-black italic">×</span>
                  
                  <div className="flex items-baseline">
-                    <input type="text" inputMode="decimal" value={activeSet.reps || "0"} onChange={e => updateSet(activeEx.id, currentSetIndex, "reps", e.target.value)} disabled={isCompletedAll || isTimerRunning} className="bg-transparent text-[#8F00FF] text-7xl font-black italic w-20 text-center outline-none p-0 m-0 drop-shadow-[0_0_15px_rgba(143,0,255,0.4)]" />
+                    <input type="text" inputMode="decimal" value={activeSet.reps || "0"} onChange={e => updateSet(activeEx.id, currentSetIndex, "reps", e.target.value)} disabled={isCompletedAll || isTimerRunning} className="bg-transparent text-[#a855f7] text-7xl font-black italic w-20 text-center outline-none p-0 m-0 drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]" />
                     <span className="text-zinc-500 text-2xl font-black italic ml-1 uppercase">R</span>
                  </div>
               </div>
@@ -256,7 +256,7 @@ export default function WorkoutApp() {
                     {activeEx.sets.map((s, idx) => s.completed && (
                        <div key={idx} className="flex justify-between items-center bg-[#111] px-5 py-4 rounded-[20px] border border-white/5">
                           <span className="text-zinc-500 font-black italic uppercase">Set {idx+1}</span>
-                          <span className="text-white font-black italic text-lg">{s.weight}KG <span className="text-zinc-600">×</span> <span className="text-[#8F00FF]">{s.reps}R</span></span>
+                          <span className="text-white font-black italic text-lg">{s.weight}KG <span className="text-zinc-600">×</span> <span className="text-[#a855f7]">{s.reps}R</span></span>
                        </div>
                     ))}
                     {!activeEx.sets.some(s => s.completed) && <p className="text-zinc-600 text-sm italic font-medium">No sets completed yet.</p>}
@@ -317,10 +317,10 @@ export default function WorkoutApp() {
 
       <div className="px-6 pt-4">
         {/* TITULO GIGANTE */}
-        <div className="mb-10">
+        <div className="mb-10 pt-4">
           <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em] mb-2">ACTIVE SESSION</p>
           <h2 className="text-5xl font-black italic text-white uppercase leading-[0.9] tracking-tighter">
-            LET'S <span className="text-[#8F00FF]">SMASH IT.</span><br/>
+            LET'S <span className="text-[#a855f7]">SMASH IT.</span><br/>
             NO EXCUSES.
           </h2>
         </div>
@@ -355,19 +355,19 @@ export default function WorkoutApp() {
           </div>
         )}
 
-        <button onClick={() => setShowAddModal(true)} className="mt-6 w-full bg-[#1a1a1a] text-white h-[88px] rounded-[32px] flex items-center justify-center font-black italic uppercase tracking-wider text-xl hover:bg-[#8F00FF]/20 hover:text-[#8F00FF] transition-all">
+        <button onClick={() => setShowAddModal(true)} className="mt-6 mb-8 w-full bg-[#1a1a1a] text-white h-[88px] rounded-[32px] flex items-center justify-center font-black italic uppercase tracking-wider text-xl hover:bg-[#8F00FF]/20 hover:text-[#8F00FF] transition-all">
           <Plus className="w-6 h-6 mr-2" /> ADD EXERCISE
         </button>
-      </div>
 
-      {/* START WORKOUT BUTTON (FLOATING) */}
+      {/* START WORKOUT BUTTON (IN FLOW) */}
       {exercises.length > 0 && (
-         <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#050505] via-[#050505]/80 to-transparent">
-            <button onClick={saveWorkout} disabled={isSaving} className="w-full bg-[#8F00FF] text-white font-black italic text-xl uppercase py-5 rounded-[24px] shadow-[0_0_40px_rgba(143,0,255,0.4)] active:scale-95 transition-transform flex justify-center items-center gap-2">
+         <div className="pb-8">
+            <button onClick={saveWorkout} disabled={isSaving} className="w-full bg-[#a855f7] hover:bg-[#b57aff] text-white font-black italic text-xl uppercase py-5 rounded-[24px] shadow-[0_0_40px_rgba(168,85,247,0.3)] active:scale-95 transition-transform flex justify-center items-center gap-2">
                {isSaving ? <RefreshCcw className="w-6 h-6 animate-spin" /> : 'FINISH WORKOUT'}
             </button>
          </div>
       )}
+      </div>
     </div>
   );
 }

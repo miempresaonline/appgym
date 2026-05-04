@@ -18,39 +18,38 @@ export default async function DashboardHome() {
         <h2 className="text-5xl font-black italic text-white uppercase leading-[0.9] tracking-tighter">
           HELLO, {name}.<br/>
           READY TO <br/>
-          <span className="text-[#8F00FF]">SMASH IT?</span>
+          <span className="text-[#a855f7]">SMASH IT?</span>
         </h2>
       </div>
 
       {/* ACTIVE PROGRAM CARD */}
-      <div className="px-6 mb-12">
-        <div className="relative rounded-[32px] w-full h-[320px] bg-zinc-900 border border-white/5 flex flex-col justify-end p-6">
+      <div className="px-6 mb-8">
+        <div className="relative rounded-[32px] w-full h-[320px] bg-zinc-900 border border-white/5 flex flex-col justify-end p-6 mb-4">
           <img 
             src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1470&auto=format&fit=crop" 
             alt="Workout" 
             className="absolute inset-0 w-full h-full object-cover rounded-[32px] opacity-40 mix-blend-luminosity"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent rounded-[32px]"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent rounded-[32px]"></div>
           
           <div className="relative z-10">
              <span className="text-[#FF6700] text-[10px] font-black uppercase tracking-widest mb-2 block">
                 ACTIVE PROGRAM
              </span>
-             <h3 className="text-4xl font-black italic text-white uppercase leading-none tracking-tighter mb-3">
+             <h3 className="text-4xl font-black italic text-white uppercase leading-none tracking-tighter mb-3 drop-shadow-md">
                 UPPER BODY<br/>
                 POWER
              </h3>
-             <div className="flex items-center gap-2 text-zinc-400 text-xs font-bold uppercase tracking-widest">
+             <div className="flex items-center gap-2 text-zinc-300 text-xs font-bold uppercase tracking-widest">
                 <span>45 MIN</span>
-                <div className="w-1 h-1 rounded-full bg-zinc-600"></div>
+                <div className="w-1 h-1 rounded-full bg-zinc-500"></div>
                 <span>850 KCAL</span>
              </div>
           </div>
-
-          <Link href="/dashboard/train" className="absolute -bottom-6 left-6 right-6 bg-[#8F00FF] hover:bg-[#a65cff] text-white py-5 rounded-full flex items-center justify-center font-black italic text-lg uppercase tracking-wide shadow-[0_10px_30px_rgba(143,0,255,0.4)] transition-transform active:scale-95">
-             START WORKOUT
-          </Link>
         </div>
+        <Link href="/dashboard/train" className="w-full bg-[#a855f7] hover:bg-[#b57aff] text-white py-5 rounded-full flex items-center justify-center font-black italic text-lg uppercase tracking-wide shadow-[0_10px_30px_rgba(168,85,247,0.3)] transition-transform active:scale-95">
+           START WORKOUT
+        </Link>
       </div>
 
       {/* PERFORMANCE SECTION */}
