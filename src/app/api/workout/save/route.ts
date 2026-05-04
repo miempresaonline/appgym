@@ -48,7 +48,7 @@ export async function POST(req: Request) {
           data: {
             name: ex.name,
             userId: user.id,
-            trackingType: "WEIGHT_REPS"
+            trackingType: ex.trackingType || "WEIGHT_REPS"
           }
         });
       }
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
         workoutId: workout.id,
         exerciseId: exerciseDb.id,
         weight: Number(set.weight) || 0,
-        reps: Number(set.reps) || 0,
+        reps: Number(set.reps) || (ex.trackingType === 'UNILATERAL' ? Number(set.repsLeft) + Number(set.repsRight) : 0),
         completed: true
       }));
 

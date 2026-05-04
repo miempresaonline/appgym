@@ -12,7 +12,7 @@ export default function TopNav({ user }: { user: any }) {
             <span className="text-sm font-bold text-brand-purple">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
           )}
         </div>
-        <h1 className="text-xl font-black italic tracking-tighter text-brand-purple">KINETIC</h1>
+        <h1 className="text-xl font-black italic tracking-tighter text-brand-purple">AppGym</h1>
       </div>
       <button className="relative p-2 text-zinc-400 hover:text-white transition-colors">
         <Bell className="w-6 h-6" />

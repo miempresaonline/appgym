@@ -77,13 +77,13 @@ export default async function DashboardHome() {
                 <div className="w-10 h-10 rounded-full bg-[#352d45] flex items-center justify-center">
                   <Bot className="w-5 h-5 text-[#b57aff]" />
                 </div>
-                <span className="text-white text-sm font-bold tracking-wide">Kinetic AI</span>
+                <span className="text-white text-sm font-bold tracking-wide">AppGym AI</span>
               </div>
               <div className="w-1.5 h-1.5 rounded-full bg-[#ff6b00] shadow-[0_0_10px_#ff6b00]"></div>
             </div>
             
             <p className="text-[#a0a0a0] text-sm leading-relaxed mb-6 pr-4">
-              Based on yesterday's recovery metrics, I recommend focusing on controlled eccentrics today.
+              ¿Qué pasa, gymbro {session?.user?.name?.split(" ")[0] || "!"}? Según los kilos que moviste la semana pasada, hoy toca enfocar el entreno en hipertrofia controlada.
             </p>
 
             <Link href="/dashboard/ai" className="flex items-center gap-2 text-[11px] font-bold text-[#b57aff] uppercase tracking-widest hover:text-white transition-colors">
