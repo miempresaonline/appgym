@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { X, Plus, Save, Clock, Bot, ChevronRight, Play } from "lucide-react";
+import { X, Plus, Save, Clock, Bot, ChevronRight, Play, Dumbbell } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type SetRecord = { weight: string; reps: string; completed: boolean };
