@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { X, Plus, Save, Clock, Bot, ChevronRight, Play, Dumbbell } from "lucide-react";
+import { X, Plus, Save, Clock, Bot, ChevronRight, Play, Dumbbell, Minus, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type SetRecord = { weight: string; reps: string; completed: boolean };
@@ -8,14 +8,56 @@ type ExerciseRecord = { id: string; name: string; sets: SetRecord[] };
 
 export default function WorkoutApp() {
   const router = useRouter();
+  
+  // Workout State
+  const [name, setName] = useState("");
+  const [notes, setNotes] = useState("");
+  const [rpe, setRpe] = useState<string>("5");
   const [exercises, setExercises] = useState<ExerciseRecord[]>([]);
+  
+  // View State
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
   
-  // Timer state
+  // Timer State
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
+  // Load from LocalStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("appgym_workout_draft");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.exercises && parsed.exercises.length > 0) {
+          setExercises(parsed.exercises);
+          setName(parsed.name || "");
+          setNotes(parsed.notes || "");
+          setRpe(parsed.rpe || "5");
+        }
+      } catch (e) {
+        console.error("Draft error", e);
+      }
+    }
+    
+    // Set default name if empty
+    if (!name) {
+      const today = new Date().toLocaleDateString("es-ES", { weekday: 'short', day: 'numeric', month: 'short' });
+      setName(`Entrenamiento Libre (${today})`);
+    }
+    
+    setIsLoaded(true);
+  }, []);
+
+  // Save to LocalStorage
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem("appgym_workout_draft", JSON.stringify({ name, notes, rpe, exercises }));
+    }
+  }, [exercises, name, notes, rpe, isLoaded]);
+
+  // Timer Tick
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isTimerRunning && timerSeconds > 0) {
@@ -32,11 +74,11 @@ export default function WorkoutApp() {
   }, [isTimerRunning, timerSeconds]);
 
   const addExercise = () => {
-    const name = prompt("Nombre del ejercicio (ej. Press Banca):");
-    if (!name) return;
+    const exName = prompt("Nombre del ejercicio (ej. Press Banca):");
+    if (!exName) return;
     const newEx = {
       id: Date.now().toString(),
-      name,
+      name: exName,
       sets: [{ weight: "", reps: "", completed: false }],
     };
     setExercises([...exercises, newEx]);
@@ -49,14 +91,14 @@ export default function WorkoutApp() {
         if (ex.id !== exId) return ex;
         const newSets = [...ex.sets];
         newSets[setIndex].completed = true;
-        // Si es el último set, añadimos uno nuevo vacío
+        // Auto-add new empty set
         if (setIndex === newSets.length - 1) {
           newSets.push({ weight: newSets[setIndex].weight, reps: newSets[setIndex].reps, completed: false });
         }
         return { ...ex, sets: newSets };
       })
     );
-    // Iniciar temporizador de 90 segundos
+    // Start timer
     setTimerSeconds(90);
     setIsTimerRunning(true);
   };
@@ -72,10 +114,13 @@ export default function WorkoutApp() {
     );
   };
 
+  const adjustTimer = (amount: number) => {
+    setTimerSeconds(prev => Math.max(0, prev + amount));
+  };
+
   const saveWorkout = async () => {
     setIsSaving(true);
     try {
-      // Filtrar ejercicios que tienen sets completados
       const validExercises = exercises.map(ex => ({
         ...ex,
         sets: ex.sets.filter(s => s.completed)
@@ -87,23 +132,31 @@ export default function WorkoutApp() {
         return;
       }
 
+      if (!confirm("¿Seguro que quieres terminar y guardar el entrenamiento?")) {
+        setIsSaving(false);
+        return;
+      }
+
       const res = await fetch("/api/workout/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: "Entrenamiento Libre",
-          duration: 45, // Hardcoded for now
+          name: name || "Entrenamiento Libre",
+          notes,
+          rpe,
           exercises: validExercises
         })
       });
 
       if (res.ok) {
+        localStorage.removeItem("appgym_workout_draft");
         router.push("/dashboard");
       } else {
         alert("Error al guardar.");
       }
     } catch (e) {
       console.error(e);
+      alert("Error de conexión");
     }
     setIsSaving(false);
   };
@@ -114,6 +167,8 @@ export default function WorkoutApp() {
     return `${m}:${s}`;
   };
 
+  if (!isLoaded) return <div className="min-h-screen bg-black" />; // Avoid hydration mismatch flash
+
   // --- VISTA ACTIVA DE EJERCICIO ---
   if (activeExerciseId) {
     const activeEx = exercises.find((e) => e.id === activeExerciseId)!;
@@ -123,17 +178,16 @@ export default function WorkoutApp() {
 
     return (
       <div className="fixed inset-0 bg-[#050505] z-50 flex flex-col animate-in slide-in-from-bottom-10 duration-500 overflow-y-auto">
-        {/* Cabecera */}
         <div className="flex justify-between items-center p-6">
           <button onClick={() => setActiveExerciseId(null)} className="p-2 -ml-2 text-zinc-400 hover:text-white">
             <X className="w-6 h-6" />
           </button>
-          <div className="bg-[#1a1525] px-4 py-1.5 rounded-full border border-[#8F00FF]/20">
+          <div className="bg-[#1a1525] px-4 py-1.5 rounded-full border border-[#8F00FF]/20 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#8F00FF] animate-pulse"></span>
             <span className="text-[10px] font-black text-[#8F00FF] tracking-widest uppercase">Active Workout</span>
           </div>
         </div>
 
-        {/* Imagen del ejercicio */}
         <div className="relative mx-6 h-48 rounded-[32px] overflow-hidden flex items-end p-6 bg-[#111]">
           <img 
             src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop" 
@@ -141,16 +195,18 @@ export default function WorkoutApp() {
             alt="Exercise bg"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-          <h2 className="relative z-10 text-4xl font-black text-white uppercase tracking-tighter shadow-black drop-shadow-2xl">
+          <h2 className="relative z-10 text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter shadow-black drop-shadow-2xl">
             {activeEx.name}
           </h2>
         </div>
 
-        {/* Inputs de Serie Actual */}
-        <div className="mt-10 flex flex-col items-center px-6">
-          <span className="text-[#888888] text-[11px] font-bold tracking-[0.2em] uppercase mb-4">
-            Current Set ({currentSetIndex !== -1 ? currentSetIndex + 1 : activeEx.sets.length})
-          </span>
+        <div className="mt-8 flex flex-col items-center px-6">
+          <div className="flex items-center gap-2 mb-4">
+             <span className="text-[#888888] text-[11px] font-bold tracking-[0.2em] uppercase">
+               Set ({currentSetIndex !== -1 ? currentSetIndex + 1 : activeEx.sets.length})
+             </span>
+             {isTimerRunning && <span className="bg-[#8F00FF]/20 text-[#8F00FF] text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Serie Guardada</span>}
+          </div>
           
           <div className="flex items-end gap-3 justify-center">
             <div className="flex items-baseline border-b-2 border-white/20 focus-within:border-[#8F00FF] transition-colors pb-1">
@@ -181,8 +237,7 @@ export default function WorkoutApp() {
           </div>
         </div>
 
-        {/* Temporizador */}
-        <div className="mt-12 flex justify-center">
+        <div className="mt-8 flex flex-col items-center">
           <div className="relative w-36 h-36 flex items-center justify-center">
             <svg className="absolute w-full h-full -rotate-90" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="46" stroke="#151515" strokeWidth="4" fill="none" />
@@ -197,24 +252,19 @@ export default function WorkoutApp() {
                 className="transition-all duration-1000 ease-linear"
               />
             </svg>
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center z-10">
               <span className="text-[#ff6b00] text-[10px] font-black tracking-widest uppercase mb-1">Rest</span>
               <span className="text-3xl font-black text-white">{formatTime(timerSeconds)}</span>
             </div>
           </div>
-        </div>
-
-        {/* AI Tip */}
-        <div className="mx-6 mt-10 bg-[#111] rounded-[24px] p-5 flex items-start gap-4 border border-white/5">
-          <div className="w-8 h-8 rounded-full bg-[#1a1525] flex-shrink-0 flex items-center justify-center">
-             <Bot className="w-4 h-4 text-[#8F00FF]" />
+          
+          <div className="flex items-center gap-4 mt-4">
+             <button onClick={() => adjustTimer(-15)} className="text-zinc-500 hover:text-white px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] font-bold tracking-widest">-15S</button>
+             <button onClick={() => { setTimerSeconds(0); setIsTimerRunning(false); }} className="text-[#ff6b00] hover:text-[#ff8533] px-3 py-1 rounded-full border border-[#ff6b00]/20 bg-[#ff6b00]/10 text-[10px] font-bold tracking-widest uppercase">Skip</button>
+             <button onClick={() => adjustTimer(15)} className="text-zinc-500 hover:text-white px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] font-bold tracking-widest">+15S</button>
           </div>
-          <p className="text-sm text-zinc-400 leading-relaxed font-medium">
-            Buen trabajo. Controla la excéntrica (bajada) en esta siguiente serie para maximizar hipertrofia.
-          </p>
         </div>
 
-        {/* Botonera inferior */}
         <div className="mt-auto p-6 pb-12 flex flex-col items-center gap-6">
           <button 
             onClick={() => {
@@ -227,22 +277,9 @@ export default function WorkoutApp() {
             disabled={isCompletedAll || isTimerRunning}
             className="w-full bg-[#b57aff] hover:bg-[#8F00FF] disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black text-sm h-16 rounded-[32px] transition-all uppercase tracking-widest flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(181,122,255,0.3)]"
           >
-            {isTimerRunning ? "DESCANSANDO..." : "COMPLETE SET"}
+            {isTimerRunning ? "DESCANSANDO..." : "COMPLETAR SERIE"}
           </button>
-          
-          <div className="flex items-center gap-8">
-            <button className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase hover:text-white flex items-center gap-2">
-              ✎ Adjust
-            </button>
-            <button 
-               onClick={() => { setTimerSeconds(0); setIsTimerRunning(false); }}
-               className="text-[10px] font-bold text-zinc-500 tracking-widest uppercase hover:text-white flex items-center gap-2"
-            >
-              ⏭ Skip Rest
-            </button>
-          </div>
         </div>
-
       </div>
     );
   }
@@ -251,20 +288,37 @@ export default function WorkoutApp() {
   return (
     <div className="flex flex-col min-h-screen bg-black animate-in fade-in">
       <div className="flex justify-between items-center p-6 sticky top-0 bg-black/80 backdrop-blur-md z-10">
-        <h1 className="text-xl font-black uppercase tracking-tighter">Entrenamiento Libre</h1>
-        <button onClick={saveWorkout} disabled={isSaving} className="text-[#8F00FF] flex items-center gap-2 text-sm font-bold tracking-widest uppercase">
-          {isSaving ? "Guardando..." : "Terminar"} <Save className="w-4 h-4" />
+        <h1 className="text-xl font-black uppercase tracking-tighter">Entrenamiento</h1>
+        <button onClick={saveWorkout} disabled={isSaving} className="bg-[#8F00FF] text-black px-4 py-2 rounded-full flex items-center gap-2 text-[11px] font-black tracking-widest uppercase shadow-[0_0_15px_rgba(143,0,255,0.4)]">
+          {isSaving ? "Guardando..." : "Terminar"} <Save className="w-3 h-3" />
         </button>
       </div>
 
       <div className="flex-1 px-6 pb-24">
+        {/* Cabecera del entreno */}
+        <div className="bg-[#0a0a0a] border border-white/5 p-5 rounded-[24px] mb-6">
+          <input 
+             type="text" 
+             value={name} 
+             onChange={e => setName(e.target.value)}
+             placeholder="Nombre del entreno (ej: Día de Pecho)" 
+             className="w-full bg-transparent text-xl font-black text-white uppercase tracking-tight outline-none placeholder:text-zinc-600 mb-4 border-b border-white/10 pb-2 focus:border-[#8F00FF] transition-colors"
+          />
+          <textarea 
+             value={notes}
+             onChange={e => setNotes(e.target.value)}
+             placeholder="Añade notas, cómo te sientes, músculos trabajados..." 
+             className="w-full bg-transparent text-sm text-zinc-400 outline-none resize-none h-16 placeholder:text-zinc-600"
+          />
+        </div>
+
         {exercises.length === 0 ? (
-          <div className="h-48 flex flex-col items-center justify-center text-center opacity-50 mt-10">
-            <Dumbbell className="w-12 h-12 mb-4" />
-            <p className="text-sm">No has añadido ningún ejercicio todavía.</p>
+          <div className="h-48 flex flex-col items-center justify-center text-center opacity-50 mt-4">
+            <Dumbbell className="w-12 h-12 mb-4 text-[#b57aff]" />
+            <p className="text-sm font-medium">Entrenamiento vacío. Añade tu primer ejercicio.</p>
           </div>
         ) : (
-          <div className="space-y-6 mt-4">
+          <div className="space-y-4">
             {exercises.map((ex) => (
               <div 
                 key={ex.id} 
@@ -272,12 +326,12 @@ export default function WorkoutApp() {
                 className="bg-[#111] border border-white/5 p-5 rounded-[24px] cursor-pointer hover:border-[#8F00FF]/30 transition-colors group"
               >
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-black uppercase tracking-wider text-lg">{ex.name}</h3>
+                  <h3 className="font-black uppercase tracking-wider text-base">{ex.name}</h3>
                   <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-[#8F00FF]" />
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {ex.sets.map((set, i) => (
-                    <div key={i} className={`text-xs font-bold px-3 py-1.5 rounded-md ${set.completed ? 'bg-[#8F00FF] text-black' : 'bg-zinc-800 text-zinc-400'}`}>
+                    <div key={i} className={`text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-wider ${set.completed ? 'bg-[#8F00FF] text-black shadow-[0_0_10px_rgba(143,0,255,0.3)]' : 'bg-zinc-800 text-zinc-400'}`}>
                       {set.weight ? `${set.weight}kg × ${set.reps}` : `Set ${i+1}`}
                     </div>
                   ))}
@@ -289,10 +343,28 @@ export default function WorkoutApp() {
 
         <button 
           onClick={addExercise}
-          className="mt-8 w-full border border-dashed border-zinc-700 hover:border-[#8F00FF] text-zinc-500 hover:text-[#8F00FF] h-16 rounded-[24px] transition-all flex items-center justify-center gap-2 font-bold uppercase tracking-widest text-xs"
+          className="mt-6 w-full border border-dashed border-zinc-700 hover:border-[#8F00FF] text-zinc-500 hover:text-[#8F00FF] h-16 rounded-[24px] transition-all flex items-center justify-center gap-2 font-bold uppercase tracking-widest text-[11px]"
         >
           <Plus className="w-4 h-4" /> Añadir Ejercicio
         </button>
+
+        {/* Fatiga (RPE) */}
+        {exercises.length > 0 && (
+          <div className="mt-8 bg-[#0a0a0a] border border-white/5 p-5 rounded-[24px]">
+            <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 text-center">¿Qué tan duro fue? (RPE)</h4>
+            <div className="flex flex-col gap-2">
+               <input 
+                  type="range" min="1" max="10" value={rpe} onChange={e => setRpe(e.target.value)}
+                  className="w-full accent-[#8F00FF]"
+               />
+               <div className="flex justify-between text-[10px] font-bold text-zinc-500 uppercase">
+                  <span>1 (Paseo)</span>
+                  <span className="text-[#8F00FF] text-sm">{rpe}/10</span>
+                  <span>10 (Al Fallo)</span>
+               </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

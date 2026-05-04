@@ -19,13 +19,15 @@ export async function POST(req: Request) {
     if (!user) return NextResponse.json({ message: "Usuario no encontrado" }, { status: 404 });
 
     const body = await req.json();
-    const { name, duration, exercises } = body; 
-    // exercises: { name: string, sets: { weight: number, reps: number }[] }[]
+    const { name, notes, rpe, exercises } = body; 
 
     // Create the workout
     const workout = await prisma.workout.create({
       data: {
         name: name || "Entrenamiento Libre",
+        notes: notes || null,
+        rpe: rpe ? Number(rpe) : null,
+        endTime: new Date(),
         userId: user.id,
       }
     });
