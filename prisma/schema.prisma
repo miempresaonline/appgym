@@ -53,6 +53,7 @@ model User {
   sessions      Session[]
   workouts      Workout[]
   routines      Routine[]
+  exercises     Exercise[]
   bodyWeightLogs BodyWeightLog[]
   
   createdAt     DateTime  @default(now())
@@ -69,17 +70,20 @@ model VerificationToken {
 
 // ==================== GYM MODELS ====================
 
-// Catálogo Global de Ejercicios
+// Ejercicios personalizados por el usuario
 model Exercise {
   id          String   @id @default(cuid())
-  name        String   @unique
-  muscleGroup String   // Ej: Pecho, Espalda, Piernas
-  equipment   String?  // Ej: Mancuerna, Barra, Máquina
-  description String?  @db.Text
-  image       String?
+  name        String   
+  muscleGroup String?  // Ej: Pecho, Espalda, Piernas
+  trackingType String  @default("WEIGHT_REPS") // WEIGHT_REPS, REPS_ONLY, TIME
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   sets            Set[]
   routineExercises RoutineExercise[]
+
+  @@unique([userId, name])
 }
 
 // Plantillas de Rutina creadas por el usuario
