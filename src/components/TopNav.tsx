@@ -14,7 +14,7 @@ export default function TopNav({ user }: { user: any }) {
         </div>
         <h1 className="text-xl font-black italic tracking-tighter text-brand-purple">AppGym</h1>
       </div>
-      <button className="relative p-2 text-zinc-400 hover:text-white transition-colors">
+      <button onClick={() => alert("No tienes notificaciones nuevas, gymbro.")} className="relative p-2 text-zinc-400 hover:text-white transition-colors">
         <Bell className="w-6 h-6" />
         <span className="absolute top-2 right-2 w-2 h-2 bg-brand-purple rounded-full"></span>
       </button>
