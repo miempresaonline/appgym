@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Home() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,6 +11,7 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const isValidEmail = email.includes("@") && email.includes(".");
 
@@ -21,7 +23,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white font-sans flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <main className="min-h-[100dvh] bg-black text-white font-sans flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -36,31 +38,37 @@ export default function Home() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full max-w-[360px] z-10 flex flex-col pt-16 pb-8 min-h-screen justify-between"
+        className="w-full max-w-[360px] z-10 flex flex-col pt-8 pb-4 min-h-[100dvh] justify-center"
       >
-        <div className="flex flex-col flex-grow justify-center">
+        <div className="flex flex-col">
           {/* Header / Logo */}
-          <div className="flex flex-col items-center justify-center mb-12">
+          <div className="flex flex-col items-center justify-center mb-10">
             <motion.h1 
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-[3.5rem] font-black italic tracking-tighter text-brand-purple mb-6 drop-shadow-[0_0_20px_rgba(143,0,255,0.6)]"
+              className="text-[3.5rem] font-black italic tracking-tighter text-brand-purple mb-4 drop-shadow-[0_0_20px_rgba(143,0,255,0.6)]"
             >
               APPGYM
             </motion.h1>
-            <motion.h2 
-              initial={{ y: 10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-lg font-black text-center uppercase tracking-widest leading-snug max-w-[280px]"
-            >
-              {isLogin ? "BIENVENIDO. ¿LISTO PARA ENTRENAR?" : "EMPIEZA TU VIAJE. ÚNETE AHORA."}
-            </motion.h2>
+            <div className="h-[40px] flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.h2 
+                  key={isLogin ? 'login-title' : 'register-title'}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-base font-black text-center uppercase tracking-widest leading-snug max-w-[280px]"
+                >
+                  {isLogin ? "BIENVENIDO. ¿LISTO PARA ENTRENAR?" : "EMPIEZA TU VIAJE. ÚNETE AHORA."}
+                </motion.h2>
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-5">
               {/* Email Input */}
               <motion.div 
@@ -71,6 +79,7 @@ export default function Home() {
                   Correo Electrónico
                 </label>
                 <div className="relative">
+                  {/* text-base is critical here to prevent iOS zoom bug */}
                   <input
                     type="email"
                     placeholder="atleta@appgym.com"
@@ -78,7 +87,7 @@ export default function Home() {
                     onFocus={() => setFocusedField('email')}
                     onBlur={() => setFocusedField(null)}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#151515] rounded-[32px] px-6 h-[64px] text-white placeholder:text-zinc-600 focus:outline-none focus:bg-[#1f1f1f] transition-all text-sm font-medium border border-transparent focus:border-brand-purple/50 focus:shadow-[0_0_20px_rgba(143,0,255,0.15)]"
+                    className="w-full bg-[#151515] rounded-[32px] px-6 h-[64px] text-white placeholder:text-zinc-600 focus:outline-none focus:bg-[#1f1f1f] transition-all text-base font-medium border border-transparent focus:border-brand-purple/50 focus:shadow-[0_0_20px_rgba(143,0,255,0.15)]"
                     required
                   />
                   {/* Dynamic checkmark for valid email */}
@@ -102,26 +111,43 @@ export default function Home() {
                 animate={{ scale: focusedField === 'password' ? 1.02 : 1 }}
                 className="relative"
               >
-                <div className="flex justify-between items-center mb-2 px-4">
+                <div className="flex justify-between items-center mb-2 px-4 h-[14px]">
                   <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">
                     Contraseña
                   </label>
-                  {isLogin && (
-                    <button type="button" className="text-[9px] font-bold text-brand-purple hover:text-[#c48bff] transition-colors uppercase tracking-[0.1em]">
-                      ¿Olvidaste tu contraseña?
-                    </button>
-                  )}
+                  <AnimatePresence>
+                    {isLogin && (
+                      <motion.button 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        type="button" 
+                        className="text-[9px] font-bold text-brand-purple hover:text-[#c48bff] transition-colors uppercase tracking-[0.1em]"
+                      >
+                        ¿Olvidaste tu contraseña?
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
                 </div>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#151515] rounded-[32px] px-6 h-[64px] text-white placeholder:text-zinc-600 focus:outline-none focus:bg-[#1f1f1f] transition-all text-sm font-medium border border-transparent focus:border-brand-purple/50 focus:shadow-[0_0_20px_rgba(143,0,255,0.15)] tracking-widest"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-[#151515] rounded-[32px] pl-6 pr-14 h-[64px] text-white placeholder:text-zinc-600 focus:outline-none focus:bg-[#1f1f1f] transition-all text-base font-medium border border-transparent focus:border-brand-purple/50 focus:shadow-[0_0_20px_rgba(143,0,255,0.15)] tracking-widest"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </motion.div>
             </div>
 
@@ -139,14 +165,24 @@ export default function Home() {
                   className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full"
                 />
               ) : (
-                isLogin ? "INICIAR SESIÓN" : "REGISTRARSE"
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={isLogin ? 'btn-login' : 'btn-register'}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isLogin ? "INICIAR SESIÓN" : "REGISTRARSE"}
+                  </motion.span>
+                </AnimatePresence>
               )}
             </motion.button>
           </form>
 
           {/* Social Auth */}
-          <div className="mt-10">
-            <div className="relative flex items-center justify-center mb-8">
+          <div className="mt-8">
+            <div className="relative flex items-center justify-center mb-6">
               <div className="absolute inset-x-0 h-px bg-white/5"></div>
               <span className="relative bg-transparent px-4 text-[9px] font-bold text-zinc-600 uppercase tracking-[0.2em]">
                 O continúa con
@@ -175,17 +211,27 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="text-center mt-8"
+          className="text-center mt-8 mb-4"
         >
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-[10px] font-medium text-zinc-500 hover:text-white transition-colors tracking-widest"
+            className="text-[10px] font-medium text-zinc-500 hover:text-white transition-colors tracking-widest relative group overflow-hidden"
           >
-            {isLogin ? (
-              <>¿No tienes cuenta? <span className="text-brand-purple font-bold">ÚNETE</span></>
-            ) : (
-              <>¿Ya eres atleta? <span className="text-brand-purple font-bold">INICIAR SESIÓN</span></>
-            )}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isLogin ? 'footer-login' : 'footer-register'}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isLogin ? (
+                  <>¿No tienes cuenta? <span className="text-brand-purple font-bold">ÚNETE</span></>
+                ) : (
+                  <>¿Ya eres atleta? <span className="text-brand-purple font-bold">INICIAR SESIÓN</span></>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </button>
         </motion.div>
       </motion.div>
