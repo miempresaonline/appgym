@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { X, Plus, Save, Clock, Bot, ChevronRight, Play, Dumbbell, Minus, RotateCcw, Camera, Search, Link as LinkIcon, Settings2 } from "lucide-react";
+import { X, Plus, Save, Clock, Bot, ChevronRight, Play, Dumbbell, Minus, RotateCcw, Camera, Search, Link as LinkIcon, Settings2, CheckCircle2, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type TrackingType = "WEIGHT_REPS" | "REPS_ONLY" | "TIME" | "UNILATERAL";
@@ -24,7 +24,7 @@ type ExerciseRecord = {
   sets: SetRecord[] 
 };
 
-const MUSCLES = ["Pecho", "Espalda", "Piernas", "Hombro", "Brazo", "Core"];
+const MUSCLES = ["Pecho", "Espalda", "Piernas", "Hombro", "Bíceps", "Tríceps", "Core", "Gemelos", "Glúteo"];
 
 export default function WorkoutApp() {
   const router = useRouter();
@@ -45,11 +45,13 @@ export default function WorkoutApp() {
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showFinishModal, setShowFinishModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
-  // Timer State (Bulletproof using absolute time)
+  // Timer State
   const [timerEndTime, setTimerEndTime] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [aiTip, setAiTip] = useState<string>("Buscando conexión con la mente...");
 
   // Upload ref
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,30 +68,30 @@ export default function WorkoutApp() {
 
   // Auto-name generation
   useEffect(() => {
+    const today = new Date().toLocaleDateString("es-ES", { day: 'numeric', month: 'short' });
     if (selectedMuscles.length > 0) {
-      const today = new Date().toLocaleDateString("es-ES", { day: 'numeric', month: 'short' });
-      setName(`${today} - ${selectedMuscles.join("/")}`);
+      setName(`ENTRENAMIENTO (${today}) - ${selectedMuscles.join("/")}`);
+    } else {
+      setName(`ENTRENAMIENTO (${today})`);
     }
   }, [selectedMuscles]);
 
-  // Load Draft
+  // Load Draft & Timer
   useEffect(() => {
     const saved = localStorage.getItem("appgym_workout_draft");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (parsed.exercises) setExercises(parsed.exercises);
-        if (parsed.name) setName(parsed.name);
         if (parsed.notes) setNotes(parsed.notes);
         if (parsed.rpe) setRpe(parsed.rpe);
         if (parsed.selectedMuscles) setSelectedMuscles(parsed.selectedMuscles);
         if (parsed.defaultRest) setDefaultRest(parsed.defaultRest);
+        if (parsed.timerEndTime) {
+          const rem = Math.round((parsed.timerEndTime - Date.now()) / 1000);
+          if (rem > 0) setTimerEndTime(parsed.timerEndTime);
+        }
       } catch (e) {}
-    }
-    
-    if (!name && selectedMuscles.length === 0) {
-      const today = new Date().toLocaleDateString("es-ES", { weekday: 'short', day: 'numeric', month: 'short' });
-      setName(`Entrenamiento (${today})`);
     }
     setIsLoaded(true);
   }, []);
@@ -97,9 +99,11 @@ export default function WorkoutApp() {
   // Save Draft
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem("appgym_workout_draft", JSON.stringify({ name, notes, rpe, exercises, selectedMuscles, defaultRest }));
+      localStorage.setItem("appgym_workout_draft", JSON.stringify({ 
+         notes, rpe, exercises, selectedMuscles, defaultRest, timerEndTime 
+      }));
     }
-  }, [exercises, name, notes, rpe, selectedMuscles, defaultRest, isLoaded]);
+  }, [exercises, notes, rpe, selectedMuscles, defaultRest, timerEndTime, isLoaded]);
 
   // Bulletproof Timer Tick
   useEffect(() => {
@@ -120,7 +124,7 @@ export default function WorkoutApp() {
             artwork: [{ src: '/icon.png', sizes: '512x512', type: 'image/png' }]
           });
         }
-      }, 500); // 500ms for more precision
+      }, 500);
     } else {
       setTimeLeft(0);
     }
@@ -143,6 +147,19 @@ export default function WorkoutApp() {
         return { ...ex, sets: newSets };
       })
     );
+    // Fetch AI Tip
+    const ex = exercises.find(e => e.id === exId);
+    const s = ex?.sets[setIndex];
+    if (ex && s) {
+       fetch("/api/ai/tip", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ exercise: ex.name, setNum: setIndex + 1, weight: s.weight, reps: s.reps })
+       })
+       .then(r => r.json())
+       .then(d => { if (d.tip) setAiTip(d.tip); })
+       .catch(() => setAiTip("Concéntrate. Vas a destrozar la siguiente serie."));
+    }
     // Start bulletproof timer
     setTimerEndTime(Date.now() + defaultRest * 1000);
   };
@@ -195,15 +212,14 @@ export default function WorkoutApp() {
 
   const saveWorkout = async () => {
     if (!rpe) {
-      alert("¡Gymbro! Dime qué tan duro ha sido el entreno (RPE) deslizando la barra.");
+      alert("Por favor, marca tu nivel de fatiga (RPE) antes de guardar.");
       return;
     }
 
-    // AI Check for skipped sets
     const hasUncompleted = exercises.some(ex => ex.sets.length > 1 && !ex.sets[ex.sets.length-1].completed && ex.sets.length > 2);
     let finalNotes = notes;
     if (hasUncompleted) {
-      const reason = prompt("AppGym AI: Gymbro, veo que dejaste series a medias en algún ejercicio. ¿Ha sido por fatiga, dolor o falta de tiempo? (Opcional)");
+      const reason = prompt("AppGym AI: Gymbro, veo que dejaste series a medias. ¿Cuál fue el motivo? (Fallo, dolor, falta de tiempo...)");
       if (reason) finalNotes = notes ? `${notes}\n\nMotivo series incompletas: ${reason}` : `Motivo series incompletas: ${reason}`;
     }
 
@@ -214,20 +230,11 @@ export default function WorkoutApp() {
         sets: ex.sets.filter(s => s.completed)
       })).filter(ex => ex.sets.length > 0);
 
-      if (validExercises.length === 0) {
-        alert("Añade algún set completado antes de guardar.");
-        setIsSaving(false); return;
-      }
-
-      if (!confirm("¿Seguro que quieres terminar y guardar el entrenamiento en la base de datos?")) {
-        setIsSaving(false); return;
-      }
-
       const res = await fetch("/api/workout/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: name || "Entrenamiento Libre",
+          name: name,
           notes: finalNotes,
           rpe,
           exercises: validExercises
@@ -237,7 +244,7 @@ export default function WorkoutApp() {
       if (res.ok) {
         localStorage.removeItem("appgym_workout_draft");
         router.push("/dashboard");
-      } else alert("Error al guardar.");
+      } else alert("Error al guardar en la nube.");
     } catch (e) {
       alert("Error de conexión");
     }
@@ -250,7 +257,7 @@ export default function WorkoutApp() {
     return `${m}:${s}`;
   };
 
-  if (!isLoaded) return <div className="min-h-screen bg-[#020202]" />;
+  if (!isLoaded) return <div className="min-h-screen bg-brand-dark" />;
 
   // --- MODAL AÑADIR EJERCICIO ---
   const AddExerciseModal = () => {
@@ -276,27 +283,29 @@ export default function WorkoutApp() {
     };
 
     return (
-      <div className="fixed inset-0 bg-black/90 z-[60] flex flex-col p-6 animate-in fade-in">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-black text-white uppercase tracking-widest">Catálogo</h2>
-          <button onClick={() => setShowAddModal(false)}><X className="text-white w-6 h-6" /></button>
-        </div>
+      <div className="fixed inset-0 bg-[#050505] z-[60] flex flex-col animate-in slide-in-from-bottom-full duration-300">
+        <div className="p-6 bg-[#0a0a0a] border-b border-white/5 sticky top-0 z-10 flex flex-col gap-6 shadow-2xl shadow-black">
+          <div className="flex justify-between items-center">
+            <h2 className="text-4xl font-bebas text-white uppercase tracking-wider">Añadir Ejercicio</h2>
+            <button onClick={() => setShowAddModal(false)} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
+              <ChevronDown className="text-white w-6 h-6" />
+            </button>
+          </div>
 
-        <div className="bg-[#111] p-4 rounded-2xl mb-6 space-y-4 border border-white/5">
           <div className="relative">
-            <Search className="absolute left-3 top-3 w-5 h-5 text-zinc-500" />
+            <Search className="absolute left-4 top-4 w-6 h-6 text-brand-purple" />
             <input 
               type="text" value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar o crear ejercicio..." 
-              className="w-full bg-transparent border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:border-[#b57aff] outline-none"
+              placeholder="Escribe el ejercicio..." 
+              className="w-full bg-brand-surface border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white text-lg font-bold focus:border-brand-purple outline-none shadow-[0_0_20px_rgba(143,0,255,0.1)] transition-all"
             />
           </div>
 
-          <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
             {["WEIGHT_REPS", "REPS_ONLY", "TIME", "UNILATERAL"].map((t) => (
               <button 
                 key={t} onClick={() => setSelectedType(t as TrackingType)}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase shrink-0 transition-colors ${selectedType === t ? 'bg-[#b57aff] text-black' : 'bg-white/5 text-zinc-400'}`}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase shrink-0 transition-all ${selectedType === t ? 'bg-brand-purple text-white shadow-[0_0_15px_rgba(143,0,255,0.4)]' : 'bg-white/5 text-zinc-500 hover:bg-white/10'}`}
               >
                 {t.replace("_", " ")}
               </button>
@@ -305,32 +314,72 @@ export default function WorkoutApp() {
 
           <input 
              type="text" value={machine} onChange={e => setMachine(e.target.value)}
-             placeholder="Polea, Máquina (Opcional)" 
-             className="w-full bg-transparent border-b border-white/10 py-2 text-sm text-white focus:border-[#b57aff] outline-none"
+             placeholder="¿Qué polea o máquina? (Opcional)" 
+             className="w-full bg-transparent border-b-2 border-white/10 py-3 text-lg font-bold text-white focus:border-brand-orange outline-none transition-colors"
           />
 
           {exercises.length > 0 && (
-             <label className="flex items-center gap-2 text-sm text-zinc-400 font-medium">
-               <input type="checkbox" checked={isSuperset} onChange={e => setIsSuperset(e.target.checked)} className="accent-[#b57aff] w-4 h-4 rounded" />
-               <LinkIcon className="w-4 h-4 text-[#b57aff]" /> Vincular como SuperSerie con anterior
+             <label className="flex items-center gap-3 text-base text-zinc-300 font-bold p-3 bg-brand-orange/10 border border-brand-orange/20 rounded-xl cursor-pointer">
+               <input type="checkbox" checked={isSuperset} onChange={e => setIsSuperset(e.target.checked)} className="accent-brand-orange w-5 h-5 rounded" />
+               <LinkIcon className="w-5 h-5 text-brand-orange" /> Vincular como Super-Serie con el anterior
              </label>
           )}
 
           {search.length > 0 && !filtered.find(f => f.name.toLowerCase() === search.toLowerCase()) && (
-            <button onClick={() => commitAdd(search, selectedType)} className="w-full py-3 bg-[#b57aff]/20 text-[#b57aff] rounded-xl font-bold uppercase text-xs border border-[#b57aff]/30">
-              Crear nuevo: "{search}"
+            <button onClick={() => commitAdd(search, selectedType)} className="w-full py-4 bg-brand-purple text-white rounded-2xl font-black uppercase text-sm shadow-[0_0_20px_rgba(143,0,255,0.4)] animate-pulse">
+              Crear Nuevo: "{search}"
             </button>
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-2">
+        <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-[#050505]">
+          <h3 className="text-zinc-500 font-bebas text-2xl tracking-widest mb-4">Catálogo</h3>
           {filtered.map((p, idx) => (
-            <div key={idx} onClick={() => commitAdd(p.name, (p.trackingType as TrackingType) || selectedType)} className="p-4 bg-[#0a0a0a] border border-white/5 rounded-xl flex justify-between items-center active:scale-95 transition-transform">
-              <span className="font-bold text-white text-sm uppercase">{p.name}</span>
-              <Plus className="w-5 h-5 text-[#b57aff]" />
+            <div key={idx} onClick={() => commitAdd(p.name, (p.trackingType as TrackingType) || selectedType)} className="p-5 bg-[#111] border border-white/5 rounded-2xl flex justify-between items-center active:scale-95 transition-transform cursor-pointer hover:border-brand-purple/50 group">
+              <span className="font-black text-white text-lg uppercase tracking-wide group-hover:text-brand-purple transition-colors">{p.name}</span>
+              <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-brand-purple/20 transition-colors">
+                <Plus className="w-6 h-6 text-brand-purple" />
+              </div>
             </div>
           ))}
         </div>
+      </div>
+    );
+  };
+
+  // --- FINISH MODAL (RPE & NOTES) ---
+  const FinishModal = () => {
+    return (
+      <div className="fixed inset-0 bg-[#050505]/95 backdrop-blur-xl z-[70] flex flex-col p-8 animate-in fade-in duration-500">
+         <div className="flex justify-between items-center mb-8">
+            <h2 className="text-5xl font-bebas text-white tracking-wider">RESUMEN FINAL</h2>
+            <button onClick={() => setShowFinishModal(false)} className="p-3 bg-white/10 rounded-full"><X className="text-white w-6 h-6"/></button>
+         </div>
+
+         <div className="flex-1 flex flex-col justify-center gap-10">
+            <div className="space-y-6">
+               <label className="block text-brand-purple font-black text-xl uppercase tracking-widest">FATIGA (RPE) *</label>
+               <input type="range" min="1" max="10" value={rpe || "5"} onChange={e => setRpe(e.target.value)} className="w-full h-4 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-purple" />
+               <div className="flex justify-between items-center">
+                  <span className="text-zinc-500 font-black text-lg">1 (SUAVE)</span>
+                  <span className="text-5xl font-bebas text-white drop-shadow-[0_0_15px_rgba(143,0,255,0.8)]">{rpe ? rpe : "?"}/10</span>
+                  <span className="text-brand-tertiary font-black text-lg">10 (FALLO)</span>
+               </div>
+            </div>
+
+            <div className="space-y-4">
+               <label className="block text-brand-orange font-black text-xl uppercase tracking-widest">NOTAS DEL ENTRENO</label>
+               <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Ej: Me dolió el hombro en press, subir kilos en sentadilla..." className="w-full bg-[#111] border-2 border-white/5 focus:border-brand-orange rounded-3xl p-6 text-lg text-white outline-none resize-none h-40 transition-colors shadow-inner" />
+            </div>
+         </div>
+
+         <button 
+            onClick={saveWorkout} 
+            disabled={isSaving || !rpe} 
+            className="w-full py-6 bg-brand-purple text-white disabled:bg-zinc-800 disabled:text-zinc-500 font-black text-2xl uppercase rounded-full shadow-[0_0_40px_rgba(143,0,255,0.4)] flex items-center justify-center gap-4 transition-all active:scale-95"
+         >
+            {isSaving ? "GUARDANDO..." : "CONFIRMAR Y GUARDAR"} <CheckCircle2 className="w-8 h-8" />
+         </button>
       </div>
     );
   };
@@ -343,141 +392,173 @@ export default function WorkoutApp() {
     const isCompletedAll = currentSetIndex === -1;
     const isTimerRunning = timeLeft > 0;
 
-    const aiTips = [
-      "Suelta el móvil, gymbro. Concéntrate en la respiración.",
-      "Controla la fase excéntrica en la próxima serie.",
-      "Si esta serie fue fácil, ¡súbele kilos a la barra!",
-      "Aprovecha el descanso. La hipertrofia ocurre ahora."
-    ];
-    const randomTip = aiTips[Math.floor((timeLeft||0) % aiTips.length)];
-
     return (
-      <div className="fixed inset-0 bg-[#050505] z-50 flex flex-col animate-in slide-in-from-bottom-10 duration-500 overflow-y-auto">
+      <div className="fixed inset-0 bg-[#050505] z-50 flex flex-col animate-in slide-in-from-bottom-10 duration-500">
         <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" capture="environment" className="hidden" />
         
-        <div className="flex justify-between items-center p-6">
-          <button onClick={() => setActiveExerciseId(null)} className="p-2 -ml-2 text-zinc-400 hover:text-white">
-            <X className="w-6 h-6" />
-          </button>
-          <div className="bg-[#1a1525] px-4 py-1.5 rounded-full border border-[#8F00FF]/20 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#8F00FF] animate-pulse"></span>
-            <span className="text-[10px] font-black text-[#8F00FF] tracking-widest uppercase">Focus Mode</span>
-          </div>
-        </div>
-
-        <div className="relative mx-6 h-48 rounded-[32px] overflow-hidden flex items-end p-6 bg-[#111]">
+        {/* HUGE BACKGROUND IMAGE */}
+        <div className="absolute inset-0 z-0">
           <img 
-            src={activeEx.photoUrl || "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop"} 
-            className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" 
+            src={activeEx.photoUrl || "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1470&auto=format&fit=crop"} 
+            className="w-full h-[60vh] object-cover opacity-20 mix-blend-luminosity mask-image-gradient" 
             alt="Exercise bg"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-          <div className="relative z-10 w-full flex justify-between items-end">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505]"></div>
+        </div>
+        
+        {/* HEADER */}
+        <div className="relative z-10 flex justify-between items-center p-6">
+          <button onClick={() => setActiveExerciseId(null)} className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white font-bold text-xs uppercase tracking-widest hover:bg-white/20 transition-all">
+            <ChevronDown className="w-5 h-5" /> MINIMIZAR
+          </button>
+          <div className="bg-brand-purple/20 px-4 py-2 rounded-full border border-brand-purple/40 flex items-center gap-2 backdrop-blur-md">
+            <span className="w-2.5 h-2.5 rounded-full bg-brand-purple animate-pulse shadow-[0_0_10px_#8F00FF]"></span>
+            <span className="text-[10px] font-black text-brand-purple tracking-[0.2em] uppercase">Focus</span>
+          </div>
+        </div>
+
+        {/* TITLE AREA */}
+        <div className="relative z-10 px-6 pt-10 pb-6 flex justify-between items-end">
              <div>
-                {activeEx.isSuperset && <div className="flex items-center gap-1 text-[#ff6b00] text-[9px] font-black uppercase mb-1 tracking-widest"><LinkIcon className="w-3 h-3"/> SuperSerie</div>}
-                <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter shadow-black drop-shadow-2xl leading-none">
+                {activeEx.isSuperset && <div className="flex items-center gap-2 text-brand-orange text-xs font-black uppercase mb-3 tracking-[0.2em] bg-brand-orange/10 w-max px-3 py-1 rounded-md"><LinkIcon className="w-4 h-4"/> SuperSerie</div>}
+                <h2 className="text-5xl sm:text-6xl font-bebas text-white uppercase tracking-wider drop-shadow-[0_0_30px_rgba(0,0,0,1)] leading-none">
                   {activeEx.name}
                 </h2>
-                {activeEx.machineNote && <p className="text-[#8F00FF] text-xs font-bold uppercase tracking-widest mt-1">{activeEx.machineNote}</p>}
+                {activeEx.machineNote && <p className="text-brand-purple text-sm font-black uppercase tracking-[0.2em] mt-3 bg-black/50 w-max px-3 py-1 rounded-md">{activeEx.machineNote}</p>}
              </div>
-             <button onClick={() => fileInputRef.current?.click()} className="bg-black/50 p-3 rounded-full backdrop-blur-md border border-white/10 hover:border-[#8F00FF] text-white transition-colors">
-                <Camera className="w-5 h-5" />
+             <button onClick={() => fileInputRef.current?.click()} className="bg-black/60 p-4 rounded-full backdrop-blur-xl border-2 border-white/10 hover:border-brand-purple text-white transition-all shadow-2xl">
+                <Camera className="w-6 h-6" />
              </button>
-          </div>
         </div>
 
-        {/* Resumen Series */}
-        <div className="flex flex-wrap gap-2 px-6 mt-4">
-          {activeEx.sets.map((s, idx) => (
-             s.completed && (
-                <div key={idx} className="bg-[#8F00FF]/20 text-[#8F00FF] border border-[#8F00FF]/30 px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-2 cursor-pointer" onClick={() => undoSet(activeEx.id, idx)}>
-                   {s.weight ? `${s.weight}kg x ` : ''}{activeEx.trackingType === 'UNILATERAL' ? `${s.repsLeft}L|${s.repsRight}R` : s.reps}
-                   <RotateCcw className="w-3 h-3 text-zinc-400" />
-                </div>
-             )
-          ))}
-        </div>
-
-        <div className="mt-8 flex flex-col items-center px-6">
-          <div className="flex items-center gap-2 mb-4">
-             <span className="text-[#888888] text-[11px] font-bold tracking-[0.2em] uppercase">Set ({currentSetIndex !== -1 ? currentSetIndex + 1 : activeEx.sets.length})</span>
-             {isTimerRunning && <span className="bg-[#8F00FF]/20 text-[#8F00FF] text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Serie Guardada</span>}
+        <div className="flex-1 relative z-10 flex flex-col">
+          {/* HUGE HISTORIAL SERIES (Scrollable) */}
+          <div className="px-6 flex-1 overflow-y-auto no-scrollbar pb-10">
+             <div className="space-y-3">
+               {activeEx.sets.map((s, idx) => (
+                  <div key={idx} className={`w-full p-4 rounded-2xl flex justify-between items-center border-2 transition-all ${s.completed ? 'bg-brand-purple/10 border-brand-purple shadow-[0_0_20px_rgba(143,0,255,0.15)]' : 'bg-[#111] border-white/5'}`}>
+                     <div className="flex items-center gap-4">
+                        <span className={`font-bebas text-3xl ${s.completed ? 'text-brand-purple' : 'text-zinc-600'}`}>SET {idx + 1}</span>
+                        {s.completed && (
+                           <div className="flex items-baseline gap-2">
+                              {activeEx.trackingType === 'UNILATERAL' ? (
+                                 <span className="text-2xl font-black text-white">{s.repsLeft}L <span className="text-brand-purple">/</span> {s.repsRight}R</span>
+                              ) : activeEx.trackingType === 'TIME' ? (
+                                 <span className="text-2xl font-black text-white">{s.timeSecs}S</span>
+                              ) : (
+                                 <>
+                                    <span className="text-3xl font-black text-white">{s.weight || '0'}</span><span className="text-sm font-bold text-zinc-500 uppercase">KG</span>
+                                    <span className="text-xl font-black text-brand-purple mx-1">×</span>
+                                    <span className="text-3xl font-black text-white">{s.reps || '0'}</span><span className="text-sm font-bold text-zinc-500 uppercase">REPS</span>
+                                 </>
+                              )}
+                           </div>
+                        )}
+                     </div>
+                     {s.completed && (
+                        <button onClick={() => undoSet(activeEx.id, idx)} className="w-12 h-12 bg-black/50 rounded-xl flex items-center justify-center hover:bg-brand-tertiary/20 hover:text-brand-tertiary transition-colors">
+                           <RotateCcw className="w-5 h-5 text-zinc-400" />
+                        </button>
+                     )}
+                  </div>
+               ))}
+             </div>
           </div>
-          
-          <div className="flex items-end gap-3 justify-center">
-            {activeEx.trackingType === "WEIGHT_REPS" || activeEx.trackingType === "UNILATERAL" ? (
-               <>
-                  <div className="flex items-baseline border-b-2 border-white/20 focus-within:border-[#8F00FF] pb-1">
-                     <input type="text" inputMode="decimal" pattern="[0-9]*" value={activeSet.weight} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "weight", e.target.value)} className="w-24 bg-transparent text-white text-6xl font-black tracking-tighter text-center outline-none" placeholder="0" disabled={isCompletedAll} />
-                     <span className="text-zinc-500 font-bold ml-1 uppercase text-xl">KG</span>
-                  </div>
-                  <span className="text-zinc-600 font-black text-4xl mx-2 pb-2">×</span>
-               </>
-            ) : null}
 
-            {activeEx.trackingType === "UNILATERAL" ? (
-               <div className="flex gap-2 items-center">
-                  <div className="flex flex-col items-center">
-                     <input type="text" inputMode="decimal" value={activeSet.repsLeft || ""} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "repsLeft", e.target.value)} className="w-16 border-b-2 border-white/20 focus-within:border-[#8F00FF] bg-transparent text-[#b57aff] text-4xl font-black text-center outline-none" placeholder="0"/>
-                     <span className="text-zinc-500 text-[9px] font-bold uppercase mt-1">L</span>
+          {/* INPUT AREA (Bottom) */}
+          <div className="bg-[#0a0a0a] border-t border-white/5 p-6 rounded-t-[40px] shadow-[0_-20px_50px_rgba(0,0,0,0.8)] pb-10">
+            {isTimerRunning ? (
+               <div className="flex flex-col items-center animate-in zoom-in-95 duration-500">
+                  <div className="relative w-48 h-48 flex items-center justify-center mb-6">
+                     <svg className="absolute w-full h-full -rotate-90 drop-shadow-[0_0_15px_#FF6700]" viewBox="0 0 100 100">
+                     <circle cx="50" cy="50" r="46" stroke="#151515" strokeWidth="3" fill="none" />
+                     <circle cx="50" cy="50" r="46" stroke="var(--color-brand-orange)" strokeWidth="4" fill="none" strokeLinecap="round" strokeDasharray="289" strokeDashoffset={289 - (289 * (timeLeft / defaultRest))} className="transition-all duration-500 ease-linear" />
+                     </svg>
+                     <div className="flex flex-col items-center z-10">
+                     <span className="text-brand-orange text-sm font-black tracking-widest uppercase mb-1 drop-shadow-md">RESTING</span>
+                     <span className="text-6xl font-bebas text-white tracking-widest">{formatTime(timeLeft)}</span>
+                     </div>
                   </div>
-                  <span className="text-zinc-600 font-black text-2xl">/</span>
-                  <div className="flex flex-col items-center">
-                     <input type="text" inputMode="decimal" value={activeSet.repsRight || ""} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "repsRight", e.target.value)} className="w-16 border-b-2 border-white/20 focus-within:border-[#8F00FF] bg-transparent text-[#b57aff] text-4xl font-black text-center outline-none" placeholder="0"/>
-                     <span className="text-zinc-500 text-[9px] font-bold uppercase mt-1">R</span>
+                  <div className="flex items-center gap-6 mb-6">
+                     <button onClick={() => adjustTimer(-15)} className="text-zinc-400 px-5 py-3 bg-white/5 hover:bg-white/10 rounded-full text-sm font-black transition-colors">-15S</button>
+                     <button onClick={() => setTimerEndTime(null)} className="text-brand-orange px-8 py-3 bg-brand-orange/10 border-2 border-brand-orange/20 rounded-full text-base font-black uppercase shadow-[0_0_20px_rgba(255,103,0,0.2)]">OMITIR</button>
+                     <button onClick={() => adjustTimer(15)} className="text-zinc-400 px-5 py-3 bg-white/5 hover:bg-white/10 rounded-full text-sm font-black transition-colors">+15S</button>
                   </div>
-               </div>
-            ) : activeEx.trackingType === "TIME" ? (
-               <div className="flex items-baseline border-b-2 border-white/20 focus-within:border-[#8F00FF] pb-1">
-                  <input type="text" inputMode="decimal" value={activeSet.timeSecs || ""} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "timeSecs", e.target.value)} className="w-24 bg-transparent text-[#b57aff] text-6xl font-black text-center outline-none" placeholder="0"/>
-                  <span className="text-zinc-500 font-bold ml-1 uppercase text-xl">SEGS</span>
+                  <div className="w-full bg-[#151515] rounded-3xl p-5 flex items-center gap-4 border border-white/5 shadow-inner">
+                     <div className="w-12 h-12 rounded-full bg-brand-purple/20 flex items-center justify-center shrink-0 border border-brand-purple/30"><Bot className="w-6 h-6 text-brand-purple" /></div>
+                     <p className="text-base text-zinc-300 font-bold leading-tight">"{aiTip}"</p>
+                  </div>
                </div>
             ) : (
-               <div className="flex items-baseline border-b-2 border-white/20 focus-within:border-[#8F00FF] pb-1">
-                  <input type="text" inputMode="decimal" value={activeSet.reps} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "reps", e.target.value)} className="w-20 bg-transparent text-[#b57aff] text-6xl font-black tracking-tighter text-center outline-none" placeholder="0" disabled={isCompletedAll} />
-                  <span className="text-zinc-500 font-bold ml-1 uppercase text-xl">R</span>
+               <div className="flex flex-col items-center">
+                  <div className="flex items-end gap-6 justify-center mb-8 w-full px-4">
+                     {activeEx.trackingType === "WEIGHT_REPS" || activeEx.trackingType === "UNILATERAL" ? (
+                        <div className="flex-1 flex flex-col items-center bg-[#151515] rounded-3xl py-4 border-2 border-transparent focus-within:border-brand-purple transition-colors">
+                           <span className="text-zinc-500 font-black text-sm uppercase tracking-widest mb-1">PESO</span>
+                           <div className="flex items-baseline">
+                              <input type="text" inputMode="decimal" pattern="[0-9]*" value={activeSet.weight} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "weight", e.target.value)} className="w-24 bg-transparent text-white text-6xl font-bebas tracking-tighter text-center outline-none" placeholder="0" disabled={isCompletedAll} />
+                              <span className="text-brand-purple font-black ml-1 text-2xl uppercase">KG</span>
+                           </div>
+                        </div>
+                     ) : null}
+
+                     {activeEx.trackingType === "WEIGHT_REPS" && (
+                        <div className="flex-1 flex flex-col items-center bg-[#151515] rounded-3xl py-4 border-2 border-transparent focus-within:border-brand-purple transition-colors">
+                           <span className="text-zinc-500 font-black text-sm uppercase tracking-widest mb-1">REPES</span>
+                           <div className="flex items-baseline">
+                              <input type="text" inputMode="decimal" pattern="[0-9]*" value={activeSet.reps} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "reps", e.target.value)} className="w-24 bg-transparent text-white text-6xl font-bebas tracking-tighter text-center outline-none" placeholder="0" disabled={isCompletedAll} />
+                              <span className="text-brand-purple font-black ml-1 text-2xl uppercase">R</span>
+                           </div>
+                        </div>
+                     )}
+
+                     {activeEx.trackingType === "UNILATERAL" && (
+                        <div className="flex-1 flex gap-4">
+                           <div className="flex-1 flex flex-col items-center bg-[#151515] rounded-3xl py-4 border-2 border-transparent focus-within:border-brand-tertiary transition-colors">
+                              <span className="text-zinc-500 font-black text-sm uppercase tracking-widest mb-1">LEFT</span>
+                              <input type="text" inputMode="decimal" value={activeSet.repsLeft || ""} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "repsLeft", e.target.value)} className="w-16 bg-transparent text-brand-tertiary text-5xl font-bebas text-center outline-none" placeholder="0"/>
+                           </div>
+                           <div className="flex-1 flex flex-col items-center bg-[#151515] rounded-3xl py-4 border-2 border-transparent focus-within:border-brand-tertiary transition-colors">
+                              <span className="text-zinc-500 font-black text-sm uppercase tracking-widest mb-1">RIGHT</span>
+                              <input type="text" inputMode="decimal" value={activeSet.repsRight || ""} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "repsRight", e.target.value)} className="w-16 bg-transparent text-brand-tertiary text-5xl font-bebas text-center outline-none" placeholder="0"/>
+                           </div>
+                        </div>
+                     )}
+
+                     {activeEx.trackingType === "TIME" && (
+                        <div className="flex-1 flex flex-col items-center bg-[#151515] rounded-3xl py-4 border-2 border-transparent focus-within:border-brand-orange transition-colors">
+                           <span className="text-zinc-500 font-black text-sm uppercase tracking-widest mb-1">TIEMPO</span>
+                           <div className="flex items-baseline">
+                              <input type="text" inputMode="decimal" value={activeSet.timeSecs || ""} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "timeSecs", e.target.value)} className="w-32 bg-transparent text-brand-orange text-6xl font-bebas text-center outline-none" placeholder="0"/>
+                              <span className="text-brand-orange font-black ml-1 text-2xl uppercase">SEGS</span>
+                           </div>
+                        </div>
+                     )}
+
+                     {activeEx.trackingType === "REPS_ONLY" && (
+                        <div className="flex-1 flex flex-col items-center bg-[#151515] rounded-3xl py-4 border-2 border-transparent focus-within:border-brand-purple transition-colors">
+                           <span className="text-zinc-500 font-black text-sm uppercase tracking-widest mb-1">REPETICIONES</span>
+                           <div className="flex items-baseline">
+                              <input type="text" inputMode="decimal" pattern="[0-9]*" value={activeSet.reps} onChange={(e) => updateSet(activeEx.id, currentSetIndex, "reps", e.target.value)} className="w-32 bg-transparent text-brand-purple text-7xl font-bebas tracking-tighter text-center outline-none" placeholder="0" disabled={isCompletedAll} />
+                           </div>
+                        </div>
+                     )}
+                  </div>
+                  
+                  <button 
+                     onClick={() => {
+                        if ((activeEx.trackingType === 'UNILATERAL' && (activeSet.repsLeft || activeSet.repsRight)) || (activeEx.trackingType === 'TIME' && activeSet.timeSecs) || (activeSet.reps)) {
+                        completeSet(activeEx.id, currentSetIndex);
+                        } else alert("Introduce repeticiones o datos válidos");
+                     }}
+                     disabled={isCompletedAll}
+                     className="w-full bg-brand-purple hover:bg-[#a65cff] disabled:bg-[#1a1a1a] disabled:text-zinc-600 text-white font-bebas text-3xl py-6 rounded-full uppercase tracking-widest flex items-center justify-center shadow-[0_0_40px_rgba(143,0,255,0.4)] transition-all active:scale-95"
+                  >
+                     COMPLETAR SERIE
+                  </button>
                </div>
             )}
           </div>
-        </div>
-
-        <div className="mt-8 flex flex-col items-center">
-          <div className="relative w-36 h-36 flex items-center justify-center">
-            <svg className="absolute w-full h-full -rotate-90" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="46" stroke="#151515" strokeWidth="4" fill="none" />
-              <circle cx="50" cy="50" r="46" stroke="#ff6b00" strokeWidth="4" fill="none" strokeLinecap="round" strokeDasharray="289" strokeDashoffset={isTimerRunning ? 289 - (289 * (timeLeft / defaultRest)) : 289} className="transition-all duration-500 ease-linear" />
-            </svg>
-            <div className="flex flex-col items-center z-10">
-              <span className="text-[#ff6b00] text-[10px] font-black tracking-widest uppercase mb-1">Rest</span>
-              <span className="text-3xl font-black text-white">{formatTime(timeLeft)}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 mt-4">
-             <button onClick={() => adjustTimer(-15)} className="text-zinc-500 px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold">-15S</button>
-             <button onClick={() => setTimerEndTime(null)} className="text-[#ff6b00] px-3 py-1 bg-[#ff6b00]/10 border border-[#ff6b00]/20 rounded-full text-[10px] font-bold uppercase">Skip</button>
-             <button onClick={() => adjustTimer(15)} className="text-zinc-500 px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold">+15S</button>
-          </div>
-        </div>
-
-        {isTimerRunning && (
-           <div className="mx-6 mt-6 bg-[#111] rounded-[24px] p-5 flex items-start gap-4 border border-white/5">
-             <div className="w-8 h-8 rounded-full bg-[#1a1525] shrink-0 flex items-center justify-center"><Bot className="w-4 h-4 text-[#8F00FF]" /></div>
-             <p className="text-sm text-zinc-400 font-medium italic">"{randomTip}"</p>
-           </div>
-        )}
-
-        <div className="mt-auto p-6 pb-12 flex flex-col items-center gap-6">
-          <button 
-            onClick={() => {
-              if ((activeEx.trackingType === 'UNILATERAL' && (activeSet.repsLeft || activeSet.repsRight)) || (activeEx.trackingType === 'TIME' && activeSet.timeSecs) || (activeSet.reps)) {
-                completeSet(activeEx.id, currentSetIndex);
-              } else alert("Introduce repeticiones o datos válidos");
-            }}
-            disabled={isCompletedAll || isTimerRunning}
-            className="w-full bg-[#b57aff] disabled:bg-[#1a1a1a] disabled:text-zinc-600 text-black font-black text-sm h-16 rounded-[32px] uppercase tracking-widest flex items-center justify-center shadow-[0_0_30px_rgba(181,122,255,0.3)]"
-          >
-            {isTimerRunning ? "DESCANSANDO..." : "COMPLETAR SERIE"}
-          </button>
         </div>
       </div>
     );
@@ -485,69 +566,96 @@ export default function WorkoutApp() {
 
   // --- VISTA RESUMEN DEL ENTRENAMIENTO ---
   return (
-    <div className="flex flex-col min-h-screen bg-[#020202] animate-in fade-in">
+    <div className="flex flex-col min-h-screen bg-brand-dark animate-in fade-in pb-32">
       {showAddModal && <AddExerciseModal />}
+      {showFinishModal && <FinishModal />}
       
       {showSettingsModal && (
-         <div className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-6 animate-in fade-in">
-            <div className="bg-[#111] border border-white/10 p-6 rounded-[32px] w-full max-w-sm">
-               <h3 className="text-white font-black uppercase mb-4 tracking-widest text-sm">Ajustes AppGym</h3>
-               <label className="block text-zinc-400 text-xs font-bold uppercase tracking-widest mb-2">Descanso por Defecto (Segundos)</label>
-               <input type="number" inputMode="decimal" value={defaultRest} onChange={e => setDefaultRest(Number(e.target.value) || 90)} className="w-full bg-black border border-white/10 rounded-xl p-3 text-white focus:border-[#b57aff] outline-none mb-6" />
-               <button onClick={() => setShowSettingsModal(false)} className="w-full py-3 bg-[#b57aff] text-black font-black uppercase rounded-xl">Guardar</button>
+         <div className="fixed inset-0 bg-[#050505]/95 backdrop-blur-md z-[60] flex items-center justify-center p-6 animate-in fade-in">
+            <div className="bg-[#111] border border-white/10 p-8 rounded-[40px] w-full max-w-sm shadow-2xl">
+               <h3 className="text-brand-purple font-bebas text-4xl uppercase mb-6 tracking-wider">Ajustes del Entreno</h3>
+               <label className="block text-zinc-400 text-sm font-black uppercase tracking-widest mb-3">Descanso por Defecto (Segs)</label>
+               <input type="number" inputMode="decimal" value={defaultRest} onChange={e => setDefaultRest(Number(e.target.value) || 90)} className="w-full bg-[#050505] border-2 border-white/5 rounded-2xl p-5 text-3xl font-bebas text-center text-white focus:border-brand-purple outline-none mb-8 transition-colors" />
+               <div className="flex gap-4">
+                  <button onClick={() => setShowSettingsModal(false)} className="flex-1 py-4 bg-white/5 text-zinc-400 font-black uppercase rounded-2xl hover:bg-white/10 transition-colors">Cancelar</button>
+                  <button onClick={() => setShowSettingsModal(false)} className="flex-1 py-4 bg-brand-purple text-white shadow-[0_0_20px_rgba(143,0,255,0.4)] font-black uppercase rounded-2xl">Guardar</button>
+               </div>
             </div>
          </div>
       )}
 
-      <div className="flex justify-between items-center p-6 sticky top-0 bg-[#020202]/90 backdrop-blur-md z-10 border-b border-white/5">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setShowSettingsModal(true)}>
-           <Settings2 className="w-5 h-5 text-[#8F00FF]" />
-           <h1 className="text-lg font-black uppercase tracking-tighter">AppGym <span className="text-zinc-600">Pro</span></h1>
+      {/* HEADER PRINCIPAL */}
+      <div className="flex justify-between items-center p-6 sticky top-0 bg-brand-dark/90 backdrop-blur-xl z-10 border-b border-white/5">
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setShowSettingsModal(true)}>
+           <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-white/10 transition-colors">
+              <Settings2 className="w-5 h-5 text-brand-purple" />
+           </div>
+           <div>
+              <h1 className="text-xl font-black uppercase tracking-tighter leading-none text-white">AppGym <span className="text-brand-purple">Pro</span></h1>
+              <span className="text-[10px] text-brand-orange font-black tracking-widest uppercase">Timer: {defaultRest}s</span>
+           </div>
         </div>
-        <button onClick={saveWorkout} disabled={isSaving || !rpe} className="bg-[#8F00FF] text-black disabled:bg-zinc-800 disabled:text-zinc-500 px-4 py-2 rounded-full flex items-center gap-2 text-[11px] font-black tracking-widest uppercase shadow-[0_0_15px_rgba(143,0,255,0.4)]">
-          {isSaving ? "..." : "Terminar"} <Save className="w-3 h-3" />
+        <button onClick={() => setShowFinishModal(true)} disabled={exercises.length === 0} className="bg-brand-purple text-white disabled:bg-zinc-800 disabled:text-zinc-600 disabled:shadow-none px-6 py-3 rounded-full flex items-center gap-2 text-sm font-black tracking-widest uppercase shadow-[0_0_20px_rgba(143,0,255,0.4)] transition-all hover:scale-105 active:scale-95">
+          FINALIZAR
         </button>
       </div>
 
-      <div className="flex-1 px-6 pb-24 pt-6">
-        <div className="bg-[#0a0a0a] border border-white/5 p-5 rounded-[24px] mb-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#8F00FF]/5 rounded-full blur-3xl"></div>
-          <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Día de Pecho" className="w-full bg-transparent text-2xl font-black text-white uppercase tracking-tight outline-none placeholder:text-zinc-700 mb-4" />
-          <div className="flex gap-2 overflow-x-auto pb-4 mb-2 no-scrollbar">
+      <div className="px-6 pt-8">
+        {/* TITULO Y MUSCULOS GIGANTES */}
+        <div className="mb-10">
+          <h2 className="text-6xl font-bebas text-white uppercase tracking-wider leading-[0.85] mb-6 drop-shadow-lg">{name}</h2>
+          <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
              {MUSCLES.map(m => (
-                <button key={m} onClick={() => toggleMuscle(m)} className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase shrink-0 transition-all ${selectedMuscles.includes(m) ? 'bg-[#8F00FF] text-black' : 'bg-white/5 text-zinc-500 hover:text-white'}`}>{m}</button>
+                <button key={m} onClick={() => toggleMuscle(m)} className={`px-6 py-3 rounded-2xl text-sm font-black tracking-widest uppercase shrink-0 transition-all border-2 ${selectedMuscles.includes(m) ? 'bg-brand-purple border-brand-purple text-white shadow-[0_0_20px_rgba(143,0,255,0.4)]' : 'bg-transparent border-white/10 text-zinc-500 hover:border-white/30'}`}>
+                   {m}
+                </button>
              ))}
           </div>
-          <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="¿Qué tal te sientes hoy, gymbro?" className="w-full bg-transparent text-sm text-zinc-400 outline-none resize-none h-12 placeholder:text-zinc-700" />
         </div>
 
         {exercises.length === 0 ? (
-          <div className="h-48 flex flex-col items-center justify-center opacity-40 border border-dashed border-zinc-800 rounded-[32px]">
-            <Dumbbell className="w-12 h-12 mb-4 text-[#8F00FF]" />
-            <p className="text-xs font-bold uppercase tracking-widest">Sin Ejercicios</p>
+          <div className="h-64 flex flex-col items-center justify-center border-4 border-dashed border-white/5 rounded-[40px] bg-white/[0.02]">
+            <div className="w-20 h-20 bg-brand-purple/10 rounded-full flex items-center justify-center mb-6">
+               <Dumbbell className="w-10 h-10 text-brand-purple" />
+            </div>
+            <p className="text-lg font-bebas text-zinc-500 tracking-widest">AÑADE TU PRIMER EJERCICIO</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {exercises.map((ex, idx) => (
-              <div key={ex.id} className="relative">
+              <div key={ex.id} className="relative group">
                 {ex.isSuperset && idx > 0 && (
-                   <div className="absolute -top-5 left-8 bottom-full w-0.5 bg-[#8F00FF]/30 z-0"></div>
+                   <div className="absolute -top-6 left-10 bottom-full w-1 bg-brand-orange/40 z-0"></div>
                 )}
-                <div onClick={() => setActiveExerciseId(ex.id)} className={`bg-[#0a0a0a] border ${ex.isSuperset ? 'border-[#8F00FF]/30' : 'border-white/5'} p-5 rounded-[24px] cursor-pointer hover:border-[#8F00FF]/50 relative z-10`}>
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                       {ex.isSuperset && <div className="text-[#8F00FF] text-[9px] font-bold uppercase tracking-widest mb-1 flex items-center gap-1"><LinkIcon className="w-3 h-3"/> Vinculado</div>}
-                       <h3 className="font-black uppercase tracking-wider text-base text-white leading-tight">{ex.name}</h3>
-                       {ex.machineNote && <span className="text-zinc-500 text-[9px] uppercase tracking-widest font-bold">{ex.machineNote}</span>}
+                <div onClick={() => setActiveExerciseId(ex.id)} className={`bg-[#0a0a0a] border-2 ${ex.isSuperset ? 'border-brand-orange/40 shadow-[0_0_30px_rgba(255,103,0,0.1)]' : 'border-white/5 shadow-2xl'} p-6 rounded-[32px] cursor-pointer hover:border-brand-purple/50 relative z-10 transition-colors`}>
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex-1 pr-4">
+                       {ex.isSuperset && <div className="text-brand-orange text-[10px] font-black uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5"><LinkIcon className="w-3.5 h-3.5"/> Super-Serie</div>}
+                       <h3 className="font-bebas text-4xl text-white leading-none tracking-wide">{ex.name}</h3>
+                       {ex.machineNote && <span className="text-zinc-500 text-xs uppercase tracking-widest font-black mt-2 inline-block bg-white/5 px-2 py-1 rounded-md">{ex.machineNote}</span>}
                     </div>
-                    {ex.photoUrl ? <img src={ex.photoUrl} className="w-8 h-8 rounded-lg object-cover opacity-50" alt="machine" /> : <ChevronRight className="w-5 h-5 text-zinc-700" />}
+                    {ex.photoUrl ? (
+                       <img src={ex.photoUrl} className="w-16 h-16 rounded-2xl object-cover opacity-60 border border-white/10 shadow-lg" alt="machine" /> 
+                    ) : (
+                       <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center shrink-0">
+                          <ChevronRight className="w-6 h-6 text-zinc-600" />
+                       </div>
+                    )}
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  
+                  {/* Sets Summary Huge */}
+                  <div className="flex flex-col gap-2">
                     {ex.sets.map((set, i) => set.completed && (
-                        <div key={i} className="text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-wider bg-[#8F00FF] text-black shadow-[0_0_10px_rgba(143,0,255,0.2)]">
-                          {ex.trackingType === 'UNILATERAL' ? `${set.repsLeft}L|${set.repsRight}R` : ex.trackingType === 'TIME' ? `${set.timeSecs}s` : `${set.weight ? set.weight+'kg x' : ''} ${set.reps}`}
+                        <div key={i} className="flex justify-between items-center bg-brand-purple/10 border border-brand-purple/20 px-4 py-3 rounded-xl">
+                           <span className="text-brand-purple font-bebas text-xl tracking-wider">SET {i+1}</span>
+                           <span className="text-white font-black text-lg uppercase">
+                              {ex.trackingType === 'UNILATERAL' ? `${set.repsLeft}L | ${set.repsRight}R` : ex.trackingType === 'TIME' ? `${set.timeSecs} SEGS` : `${set.weight ? set.weight+'KG × ' : ''}${set.reps} REPS`}
+                           </span>
                         </div>
                     ))}
+                    {!ex.sets.some(s => s.completed) && (
+                       <div className="text-zinc-600 font-black text-sm uppercase tracking-widest">Sin series completadas</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -555,22 +663,12 @@ export default function WorkoutApp() {
           </div>
         )}
 
-        <button onClick={() => setShowAddModal(true)} className="mt-4 w-full border border-white/10 bg-[#0a0a0a] text-white h-16 rounded-[24px] flex items-center justify-center gap-2 font-bold uppercase tracking-widest text-[11px] hover:border-[#8F00FF] hover:text-[#8F00FF]">
-          <Plus className="w-4 h-4" /> Añadir Ejercicio
+        <button onClick={() => setShowAddModal(true)} className="mt-8 w-full border-2 border-dashed border-white/20 bg-transparent text-white h-20 rounded-[32px] flex items-center justify-center gap-3 font-black uppercase tracking-widest text-sm hover:border-brand-purple hover:bg-brand-purple/5 transition-all group">
+          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-brand-purple group-hover:text-white transition-colors">
+             <Plus className="w-5 h-5" />
+          </div> 
+          Añadir Ejercicio
         </button>
-
-        <div className={`mt-8 bg-[#0a0a0a] border p-5 rounded-[24px] ${rpe === "" ? 'border-[#8F00FF]/50 shadow-[0_0_20px_rgba(143,0,255,0.1)]' : 'border-white/5'}`}>
-          <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center justify-between">
-             <span>RPE (Fatiga)</span>
-             {rpe === "" && <span className="text-[#8F00FF]">*Requerido</span>}
-          </h4>
-          <input type="range" min="1" max="10" value={rpe || "5"} onChange={e => setRpe(e.target.value)} className="w-full accent-[#8F00FF] mb-2" />
-          <div className="flex justify-between text-[10px] font-bold uppercase">
-             <span className="text-zinc-600">1 (Paseo)</span>
-             {rpe ? <span className="text-[#8F00FF] bg-[#8F00FF]/10 px-3 py-1 rounded-full">{rpe}/10</span> : <span className="text-zinc-600">Desliza</span>}
-             <span className="text-zinc-600">10 (Fallo)</span>
-          </div>
-        </div>
       </div>
     </div>
   );
