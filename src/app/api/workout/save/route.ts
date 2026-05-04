@@ -26,7 +26,6 @@ export async function POST(req: Request) {
     const workout = await prisma.workout.create({
       data: {
         name: name || "Entrenamiento Libre",
-        duration: duration || 0,
         userId: user.id,
       }
     });
