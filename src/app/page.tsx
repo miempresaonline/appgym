@@ -18,8 +18,42 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Implement credentials sign in
-    setTimeout(() => setIsLoading(false), 2000);
+    
+    try {
+      if (!isLogin) {
+        // Registro
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(errorData.message || "Error al registrarse");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Iniciar sesión (tanto si es login normal como si acaba de registrarse)
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false
+      });
+
+      if (res?.error) {
+        alert("Credenciales inválidas. Comprueba tu correo y contraseña.");
+      } else if (res?.ok) {
+        window.location.href = "/dashboard";
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Ha ocurrido un error inesperado.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -190,9 +224,10 @@ export default function Home() {
             </div>
 
             <motion.button
+              type="button"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => signIn('google')}
+              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
               className="w-full bg-[#111111] border border-white/5 text-white font-bold text-[11px] h-[64px] rounded-[32px] hover:bg-[#1a1a1a] transition-all flex items-center justify-center gap-3 uppercase tracking-widest"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
